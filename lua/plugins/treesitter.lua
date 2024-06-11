@@ -1,6 +1,7 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
+	opts = { ensure_installed = { "c_sharp" } },
 	config = function()
 		local configs = require("nvim-treesitter.configs")
 

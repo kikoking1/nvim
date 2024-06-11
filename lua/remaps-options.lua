@@ -10,7 +10,8 @@ vim.opt.signcolumn = "yes"
 
 vim.g.have_nerd_font = true
 
--- vim.g.background = "light"
+vim.wo.wrap = false
+vim.wo.linebreak = false
 
 vim.opt.swapfile = false
 vim.wo.number = true
