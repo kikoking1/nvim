@@ -128,9 +128,6 @@ return {
 				-- Some languages (like typescript) have entire language plugins that can be useful:
 				--    https://github.com/pmizio/typescript-tools.nvim
 				--
-				tsserver = {
-					enabled = false,
-				},
 				vtsls = {
 					-- explicitly add default filetypes, so that we can extend
 					-- them in related extras
