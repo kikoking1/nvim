@@ -36,7 +36,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
-vim.keymap.set("n", "<leader>v", vim.cmd.Ex)
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "J", "mzJ`z")
