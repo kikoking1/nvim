@@ -30,7 +30,7 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 -- Highlight when yanking
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+	group = vim.api.nvim_create_augroup("custom-highlight-yank", { clear = true }),
 	callback = function()
 		vim.highlight.on_yank()
 	end,
@@ -38,16 +38,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
-vim.keymap.set("n", "J", "mzJ`z")
+-- copy/paste to/from system clipboard
+vim.keymap.set({ "n", "v" }, "p", '"+gP')
+vim.keymap.set({ "n", "v" }, "y", [["+y]])
+vim.keymap.set("n", "Y", [["+Y]])
 
--- greatest remap ever
-vim.keymap.set({ "n", "v" }, "<leader>p", '"+gP')
-
--- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+Y]])
-
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
-
+-- pull selected text up and down when visual selected, and using J/K (up/down)
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
