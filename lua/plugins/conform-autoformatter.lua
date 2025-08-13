@@ -1,6 +1,7 @@
 return {
 	{ -- Autoformat
 		"stevearc/conform.nvim",
+		event = { "BufWritePre" },
 		lazy = false,
 		keys = {
 			{
@@ -27,6 +28,7 @@ return {
 			formatters_by_ft = {
 				lua = { "stylua" },
 				cs = { "csharpier" },
+				prisma = { "prisma-fmt" },
 				-- Conform can also run multiple formatters sequentially
 				-- python = { "isort", "black" },
 				--
@@ -38,6 +40,10 @@ return {
 				csharpier = {
 					command = "dotnet-csharpier",
 					args = { "--write-stdout" },
+				},
+				["prisma-fmt"] = {
+					command = "prisma-fmt",
+					stdin = false,
 				},
 			},
 		},

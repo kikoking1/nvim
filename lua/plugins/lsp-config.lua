@@ -4,7 +4,7 @@ return {
 		dependencies = {
 			{
 				"williamboman/mason.nvim",
-				opts = { ensure_installed = { "csharpier", "netcoredbg" } },
+				opts = { ensure_installed = { "csharpier", "netcoredbg", "prisma-fmt" } },
 				config = true,
 			},
 			"williamboman/mason-lspconfig.nvim",
