@@ -32,28 +32,25 @@ end
 
 -- Function to set up the keymaps
 function M.setup_keymaps()
-	-- Map a hotkey (e.g., <leader>t) to toggle the terminal in Normal mode
 	vim.api.nvim_set_keymap(
 		"n",
-		"<leader>t",
+		"<C-e>",
 		':lua require("bottom-terminal").toggle_terminal_bottom()<CR>',
 		{ noremap = true, silent = true }
 	)
 
-	-- Map a hotkey (e.g., <leader>t) to toggle the terminal in Insert mode
 	-- <C-o> temporarily enters Normal mode to execute the command, then returns to Insert mode.
 	vim.api.nvim_set_keymap(
 		"i",
-		"<leader>t",
+		"<C-e>",
 		'<C-o>:lua require("bottom-terminal").toggle_terminal_bottom()<CR>',
 		{ noremap = true, silent = true }
 	)
 
-	-- Map a hotkey (e.g., <leader>t) to toggle the terminal in Terminal mode
 	-- <C-\><C-n> escapes from terminal mode to Normal mode to execute the command.
 	vim.api.nvim_set_keymap(
 		"t",
-		"<leader>t",
+		"<C-e>",
 		'<C-\\><C-n>:lua require("bottom-terminal").toggle_terminal_bottom()<CR>',
 		{ noremap = true, silent = true }
 	)
