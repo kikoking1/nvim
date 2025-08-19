@@ -23,7 +23,7 @@ vim.opt.mouse = "a"
 vim.opt.list = true
 vim.opt.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
 
--- Set highlight on search, but clear on pressing <Esc> in normal mode
+-- Set highlight on search, but clear on pressing <Esc> in normal mode.....
 vim.opt.hlsearch = true
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
@@ -50,3 +50,19 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 -- Make esc key go from terminal mode to insert mode, if window is a terimnal
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
+
+-- Toggle quickfix list - open last one if none open, close if open
+vim.keymap.set("n", "<leader>q", function()
+	local qf_exists = false
+	for _, win in pairs(vim.fn.getwininfo()) do
+		if win["quickfix"] == 1 then
+			qf_exists = true
+			break
+		end
+	end
+	if qf_exists then
+		vim.cmd("cclose")
+	else
+		vim.cmd("botright copen")
+	end
+end, { desc = "Toggle quickfix list" })
