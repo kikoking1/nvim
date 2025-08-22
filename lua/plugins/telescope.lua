@@ -6,6 +6,7 @@ return {
 		config = function()
 			local builtin = require("telescope.builtin")
 
+			-- for auto populating grep search with current selected text
 			local function get_visual_selection()
 				vim.cmd('noau normal! "vy"')
 				local text = vim.fn.getreg("v")
@@ -24,12 +25,12 @@ return {
 				builtin.live_grep({ default_text = text })
 			end
 
-			vim.keymap.set("n", "<leader>fF", builtin.git_files, { desc = "[S]earch [F]iles Git" })
-			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[S]earch [F]iles All" })
-			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch [G]rep" })
-			vim.keymap.set("v", "<leader>fg", grep_string_visual, { desc = "[S]earch [G]rep with selection" })
-			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-			vim.keymap.set("n", "<leader>fr", builtin.oldfiles, {})
+			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[F]ind [F]iles All" })
+			vim.keymap.set("n", "<leader>fF", builtin.git_files, { desc = "[F]ind [F]iles Git" })
+			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[F]ind [G]rep" })
+			vim.keymap.set("v", "<leader>fg", grep_string_visual, { desc = "[F]ind [G]rep with selection" })
+			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[F]ind [K]eymaps" })
+			vim.keymap.set("n", "<leader>fh", builtin.oldfiles, { desc = "[F]ind [H]istory" })
 		end,
 	},
 	{
