@@ -13,6 +13,14 @@ return {
 			{ "folke/neodev.nvim", opts = {} },
 		},
 		config = function()
+			-- Configure diagnostics display
+			vim.diagnostic.config({
+				virtual_text = true, -- Enable inline diagnostic text
+				signs = true, -- Show diagnostic signs in sign column
+				underline = true, -- Keep underlines
+				update_in_insert = false, -- Don't show diagnostics while typing
+			})
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
 				callback = function(event)
@@ -110,6 +118,14 @@ return {
 							vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 						end, "[T]oggle Inlay [H]ints")
 					end
+
+					-- Toggle diagnostic virtual text
+					map("<leader>td", function()
+						local config = vim.diagnostic.config()
+						vim.diagnostic.config({
+							virtual_text = not config.virtual_text,
+						})
+					end, "[T]oggle [D]iagnostic virtual text")
 				end,
 			})
 
