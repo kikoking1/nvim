@@ -24,7 +24,7 @@ return {
 				builtin.live_grep({ default_text = text })
 			end
 
-			-- vim.keymap.set("n", "<leader>fF", builtin.git_files, { desc = "[S]earch [F]iles Git" })
+			vim.keymap.set("n", "<leader>fF", builtin.git_files, { desc = "[S]earch [F]iles Git" })
 			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[S]earch [F]iles All" })
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch [G]rep" })
 			vim.keymap.set("v", "<leader>fg", grep_string_visual, { desc = "[S]earch [G]rep with selection" })
