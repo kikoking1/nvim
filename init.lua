@@ -11,7 +11,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 		lazypath,
 	})
 end
+
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 require("bottom-terminal").setup_keymaps()
 require("terminal-maximize").setup()
+require("copy-commands").setup()
