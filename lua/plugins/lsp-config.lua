@@ -15,7 +15,7 @@ return {
 		config = function()
 			-- Configure diagnostics display
 			vim.diagnostic.config({
-				virtual_text = true, -- Enable inline diagnostic text
+				virtual_text = false, -- Enable inline diagnostic text
 				signs = true, -- Show diagnostic signs in sign column
 				underline = true, -- Keep underlines
 				update_in_insert = false, -- Don't show diagnostics while typing
