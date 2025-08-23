@@ -2,6 +2,7 @@ local M = {}
 
 function M.setup(opts)
 	opts = opts or {}
+
 	local keymap = opts.keymap or "<leader>cf"
 
 	vim.keymap.set("n", keymap, function()
