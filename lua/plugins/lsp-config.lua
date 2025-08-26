@@ -126,6 +126,16 @@ return {
 							virtual_text = not config.virtual_text,
 						})
 					end, "[T]oggle [D]iagnostic virtual text")
+
+					-- Show diagnostics in floating window
+					map("<leader>lE", function()
+						vim.diagnostic.open_float({
+							border = "rounded",
+							source = "always",
+							header = "",
+							prefix = "",
+						})
+					end, "Show [D]iagnostic in floating window")
 				end,
 			})
 
