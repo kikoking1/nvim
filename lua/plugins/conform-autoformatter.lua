@@ -21,7 +21,7 @@ return {
 				-- languages here or re-enable it for the disabled ones.
 				local disable_filetypes = { c = true, cpp = true }
 				return {
-					timeout_ms = 500,
+					timeout_ms = 2000,
 					lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
 				}
 			end,
@@ -29,12 +29,12 @@ return {
 				lua = { "stylua" },
 				cs = { "csharpier" },
 				prisma = { "prisma-fmt" },
+				javascript = { "eslint_d", "prettier" },
+				javascriptreact = { "eslint_d", "prettier" },
+				typescript = { "eslint_d", "prettier" },
+				typescriptreact = { "eslint_d", "prettier" },
 				-- Conform can also run multiple formatters sequentially
 				-- python = { "isort", "black" },
-				--
-				-- You can use a sub-list to tell conform to run *until* a formatter
-				-- is found.
-				-- javascript = { { "prettierd", "prettier" } },
 			},
 			formatters = {
 				csharpier = {
@@ -44,6 +44,9 @@ return {
 				["prisma-fmt"] = {
 					command = "prisma-fmt",
 					stdin = false,
+				},
+				eslint_d = {
+					timeout = 2000,
 				},
 			},
 		},
