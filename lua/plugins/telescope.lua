@@ -2,7 +2,15 @@ return {
 	{
 		"nvim-telescope/telescope.nvim",
 		tag = "0.1.6",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			{
+				"nvim-telescope/telescope-live-grep-args.nvim",
+				-- This will not install any breaking changes.
+				-- For major updates, this must be adjusted manually.
+				version = "^1.0.0",
+			},
+		},
 		config = function()
 			local builtin = require("telescope.builtin")
 
@@ -32,6 +40,15 @@ return {
 			vim.keymap.set("n", "<leader>fc", builtin.git_status, { desc = "[F]ind [C]hanged files (git)" })
 			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[F]ind [K]eymaps" })
 			vim.keymap.set("n", "<leader>fh", builtin.oldfiles, { desc = "[F]ind [H]istory" })
+
+			-- then load the extension
+			require("telescope").load_extension("live_grep_args")
+
+			vim.keymap.set(
+				"n",
+				"<leader>fa",
+				":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>"
+			)
 		end,
 	},
 	{
