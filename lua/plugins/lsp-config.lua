@@ -249,8 +249,6 @@ return {
 						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 						require("lspconfig")[server_name].setup(server)
 					end,
-					-- Disable ts_ls since we're using vtsls
-					ts_ls = function() end,
 				},
 			})
 		end,

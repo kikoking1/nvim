@@ -14,6 +14,5 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
-require("bottom-terminal").setup_keymaps()
 require("terminal-maximize").setup()
 require("copy-commands").setup()
