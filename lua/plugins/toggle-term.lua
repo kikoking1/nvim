@@ -18,6 +18,12 @@ return {
 	keys = {
 		-- Keymap to toggle the *default* terminal
 		{
+			"<C-e>",
+			"<cmd>ToggleTerm direction=horizontal<cr>",
+			desc = "Toggle Horizontal Terminal",
+			mode = { "n", "t" },
+		},
+		{
 			"<leader>th",
 			"<cmd>ToggleTerm direction=horizontal<cr>",
 			desc = "Toggle Horizontal Terminal",
