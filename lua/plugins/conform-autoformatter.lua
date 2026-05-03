@@ -48,7 +48,8 @@ return {
       formatters_by_ft = {
         lua = { "stylua" },
         cs = { "csharpier" },
-        prisma = { "prisma-fmt" },
+        -- prisma intentionally omitted: format_on_save below falls through to
+        -- the prismals LSP, which handles .prisma formatting itself.
         javascript = web,
         javascriptreact = web,
         typescript = web,
@@ -58,10 +59,6 @@ return {
         csharpier = {
           command = "dotnet-csharpier",
           args = { "--write-stdout" },
-        },
-        ["prisma-fmt"] = {
-          command = "prisma-fmt",
-          stdin = false,
         },
         eslint_d = {
           timeout = 2000,

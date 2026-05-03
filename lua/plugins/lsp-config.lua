@@ -3,7 +3,9 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      { "williamboman/mason.nvim", config = true },
+      -- mason.nvim is configured below (not via `config = true`) so we can
+      -- register the Crashdummyy registry that ships the Roslyn LSP package.
+      "williamboman/mason.nvim",
       { "williamboman/mason-lspconfig.nvim", version = "^2" },
       "WhoIsSethDaniel/mason-tool-installer.nvim",
       { "j-hui/fidget.nvim", opts = {} },
@@ -26,10 +28,19 @@ return {
         vim.lsp.config(name, opts)
       end
 
-      require("mason").setup()
+      -- The Roslyn C# language server isn't in Mason's core registry; it
+      -- ships through Crashdummyy's registry. Both registries must be listed
+      -- explicitly because providing `registries` overrides the default.
+      require("mason").setup({
+        registries = {
+          "github:mason-org/mason-registry",
+          "github:Crashdummyy/mason-registry",
+        },
+      })
 
       -- Tools installed via Mason that aren't LSP servers (formatters, linters,
-      -- DAP adapters). Node-based tools require `npm` on PATH.
+      -- DAP adapters). Node-based tools require `npm` on PATH; `roslyn` and
+      -- `csharpier`/`netcoredbg` require the .NET SDK.
       require("mason-tool-installer").setup({
         ensure_installed = {
           "stylua",
@@ -37,7 +48,9 @@ return {
           "eslint_d",
           "csharpier",
           "netcoredbg",
-          "prisma-fmt",
+          "roslyn", -- C# LSP, configured by lua/plugins/roslyn.lua
+          -- Prisma: prismals (the LSP) is in lua/lsp/servers.lua and handles
+          -- formatting itself. There is no separate `prisma-fmt` package.
         },
         run_on_start = true,
       })

@@ -60,16 +60,10 @@ return {
     },
   },
 
-  -- omnisharp is largely unmaintained for modern .NET; if you do C# work,
-  -- consider switching to seblj/roslyn.nvim. Kept here for parity.
-  omnisharp = {
-    settings = {
-      RoslynExtensionsOptions = {
-        EnableAnalyzersSupport = true,
-        EnableImportCompletion = true,
-        EnableDecompilationSupport = true,
-      },
-      FormattingOptions = { OrganizeImports = true },
-    },
-  },
+  -- The Prisma LSP also handles `.prisma` schema formatting, so we let
+  -- conform.nvim fall through to the LSP for `prisma` files.
+  prismals = {},
+
+  -- C# uses roslyn.nvim instead of omnisharp; configured in
+  -- lua/plugins/roslyn.lua (and via vim.lsp.config("roslyn", ...) there).
 }
