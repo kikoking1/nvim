@@ -56,10 +56,12 @@ return {
       })
 
       -- mason-lspconfig v2 calls vim.lsp.enable() automatically for any server
-      -- it knows is installed, picking up the configs registered above.
+      -- it knows is installed, picking up the configs registered above. We
+      -- exclude omnisharp explicitly so it never re-attaches alongside roslyn
+      -- if the package is ever (re)installed.
       require("mason-lspconfig").setup({
         ensure_installed = vim.tbl_keys(servers),
-        automatic_enable = true,
+        automatic_enable = { exclude = { "omnisharp" } },
       })
     end,
   },
