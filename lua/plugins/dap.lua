@@ -72,19 +72,87 @@ return {
         args = { "--interpreter=vscode" },
       }
 
-      -- Auto-detects bin/Debug/net*/<project>.dll. If there's exactly one
-      -- match we use it; otherwise we prompt with completion.
-      local function pick_dll()
+      -- Find every .csproj under cwd, then keep only the ones that produce a
+      -- runnable host (Exe/WinExe, ASP.NET Core Web SDK, or Worker SDK), then
+      -- glob the build output for each. Used by `pick_dll` below to drive a
+      -- single-keypress launch in multi-project solutions.
+      local function find_executable_projects()
         local cwd = vim.fn.getcwd()
-        local matches = vim.fn.glob(cwd .. "/bin/Debug/net*/*.dll", false, true)
-        if #matches == 1 then
-          return matches[1]
+        local entries = {}
+
+        for _, csproj in ipairs(vim.fn.glob(cwd .. "/**/*.csproj", false, true)) do
+          if not (csproj:match("/bin/") or csproj:match("/obj/") or csproj:match("/node_modules/")) then
+            local f = io.open(csproj, "r")
+            if f then
+              local content = f:read("*a")
+              f:close()
+
+              local is_executable = false
+              local sdk = content:match('<Project[^>]*Sdk="([^"]+)"') or ""
+              if sdk:lower():match("sdk%.web") or sdk:lower():match("sdk%.worker") then
+                is_executable = true
+              else
+                local out = content:match("<OutputType>%s*([%w]+)%s*</OutputType>")
+                if out == "Exe" or out == "WinExe" then
+                  is_executable = true
+                end
+              end
+
+              if is_executable then
+                local proj_dir = vim.fn.fnamemodify(csproj, ":h")
+                local proj_name = vim.fn.fnamemodify(csproj, ":t:r")
+                local dll_glob = proj_dir .. "/bin/Debug/net*/" .. proj_name .. ".dll"
+                for _, dll in ipairs(vim.fn.glob(dll_glob, false, true)) do
+                  table.insert(entries, {
+                    dll = dll,
+                    project = proj_name,
+                    framework = vim.fn.fnamemodify(dll, ":h:t"),
+                    relative = vim.fn.fnamemodify(dll, ":."),
+                  })
+                end
+              end
+            end
+          end
         end
+
+        return entries
+      end
+
+      local function manual_prompt()
         return vim.fn.input({
           prompt = "Path to dll: ",
-          default = cwd .. "/bin/Debug/",
+          default = vim.fn.getcwd() .. "/bin/Debug/",
           completion = "file",
         })
+      end
+
+      -- nvim-dap accepts a coroutine here for async selection; ui.select goes
+      -- through telescope-ui-select so the picker is fuzzy-searchable.
+      local function pick_dll()
+        local entries = find_executable_projects()
+
+        if #entries == 0 then
+          vim.notify(
+            "No executable .NET projects with build output found under cwd. Run `dotnet build` first.",
+            vim.log.levels.WARN
+          )
+          return manual_prompt()
+        end
+
+        if #entries == 1 then
+          return entries[1].dll
+        end
+
+        return coroutine.create(function(dap_run_co)
+          vim.ui.select(entries, {
+            prompt = "Select project to debug",
+            format_item = function(item)
+              return string.format("%s (%s)  %s", item.project, item.framework, item.relative)
+            end,
+          }, function(choice)
+            coroutine.resume(dap_run_co, choice and choice.dll or nil)
+          end)
+        end)
       end
 
       dap.configurations.cs = {

@@ -188,10 +188,20 @@ Powered by `nvim-dap` + `nvim-dap-ui`. Currently only **C# / .NET** is wired up 
 
 ### .NET workflow
 
-1. Build your project once: `dotnet build` (in a terminal, or `<leader>th` then `dotnet build`).
+1. Build your project: `dotnet build` (in a terminal, or `<leader>th` then `dotnet build`).
 2. Place breakpoints with `<leader>db`.
-3. Press `<F5>` (or `<leader>dc`) to start. If `bin/Debug/net*/*.dll` matches exactly one DLL, it launches automatically; otherwise you'll be prompted for a path.
+3. Press `<F5>` (or `<leader>dc`) to start.
 4. The dap-ui panels open automatically with stack frames, scopes, breakpoints, watches, and a REPL. They close on session exit.
+
+### How the DLL picker works
+
+`<F5>` (Launch netcoredbg) walks your repo from the current working directory and finds every `.csproj` whose project type can be launched (`<OutputType>Exe</OutputType>`, `<OutputType>WinExe</OutputType>`, `Microsoft.NET.Sdk.Web`, or `Microsoft.NET.Sdk.Worker`). It then globs `<projDir>/bin/Debug/net*/<ProjectName>.dll` for each and:
+
+- **0 matches** → warns and falls back to a manual path prompt with file completion. Usually means you haven't run `dotnet build` yet.
+- **1 match** → launches it directly, no prompt.
+- **2+ matches** → opens a Telescope picker showing `Project (framework)  relative/path/to/Project.dll`. Type to fuzzy-filter. Multi-target projects (`<TargetFrameworks>net6.0;net8.0</TargetFrameworks>`) appear as separate entries per framework.
+
+Class libraries are filtered out automatically — only projects that produce a runnable host show up.
 
 ### Keybindings
 
