@@ -1,23 +1,19 @@
 return {
-	{
-		"tpope/vim-fugitive",
-		config = function()
-			vim.keymap.set("n", "<leader>gs", ":Git<CR>", { desc = "[G]it [S]tatus" })
-			vim.keymap.set("n", "<leader>gd", ":Gvdiffsplit<CR>", { desc = "[G]it [D]iff" })
-		end,
-	},
-	{
-		"lewis6991/gitsigns.nvim",
-		config = function()
-			require("gitsigns").setup()
-
-			vim.keymap.set("n", "<leader>gh", ":Gitsigns preview_hunk<CR>", { desc = "[G]it Preview [H]unk" })
-			vim.keymap.set(
-				"n",
-				"<leader>gb",
-				":Gitsigns toggle_current_line_blame<CR>",
-				{ desc = "[G]it Toggle [Blame]" }
-			)
-		end,
-	},
+  {
+    "tpope/vim-fugitive",
+    cmd = { "Git", "Gvdiffsplit" },
+    keys = {
+      { "<leader>gs", "<cmd>Git<cr>", desc = "[G]it [S]tatus" },
+      { "<leader>gd", "<cmd>Gvdiffsplit<cr>", desc = "[G]it [D]iff" },
+    },
+  },
+  {
+    "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {},
+    keys = {
+      { "<leader>gh", "<cmd>Gitsigns preview_hunk<cr>", desc = "[G]it preview [H]unk" },
+      { "<leader>gb", "<cmd>Gitsigns toggle_current_line_blame<cr>", desc = "[G]it toggle [B]lame" },
+    },
+  },
 }

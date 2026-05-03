@@ -1,66 +1,50 @@
 return {
-	{
-		"nvim-telescope/telescope.nvim",
-		tag = "0.1.6",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			{
-				"nvim-telescope/telescope-live-grep-args.nvim",
-				-- This will not install any breaking changes.
-				-- For major updates, this must be adjusted manually.
-				version = "^1.0.0",
-			},
-		},
-		config = function()
-			local builtin = require("telescope.builtin")
+  {
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.6",
+    cmd = "Telescope",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-live-grep-args.nvim", version = "^1.0.0" },
+      "nvim-telescope/telescope-ui-select.nvim",
+    },
+    keys = function()
+      local builtin = require("telescope.builtin")
 
-			-- for auto populating grep search with current selected text
-			local function get_visual_selection()
-				vim.cmd('noau normal! "vy"')
-				local text = vim.fn.getreg("v")
-				vim.fn.setreg("v", {})
+      local function grep_visual()
+        -- Yank the visual selection into register `v` without polluting `"`.
+        vim.cmd('noau normal! "vy"')
+        local text = (vim.fn.getreg("v") or ""):gsub("\n", "")
+        vim.fn.setreg("v", {})
+        builtin.live_grep({ default_text = text })
+      end
 
-				text = string.gsub(text, "\n", "")
-				if #text > 0 then
-					return text
-				else
-					return ""
-				end
-			end
-
-			local function grep_string_visual()
-				local text = get_visual_selection()
-				builtin.live_grep({ default_text = text })
-			end
-
-			-- then load the extension.
-			require("telescope").load_extension("live_grep_args")
-
-			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[F]ind [F]iles All" })
-			vim.keymap.set("n", "<leader>fF", builtin.git_files, { desc = "[F]ind [F]iles Git" })
-			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[F]ind [G]rep" })
-			vim.keymap.set("v", "<leader>fg", grep_string_visual, { desc = "[F]ind [G]rep with selection" })
-			vim.keymap.set("n", "<leader>fc", builtin.git_status, { desc = "[F]ind [C]hanged files (git)" })
-			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[F]ind [K]eymaps" })
-			vim.keymap.set("n", "<leader>fh", builtin.oldfiles, { desc = "[F]ind [H]istory" })
-			vim.keymap.set(
-				"n",
-				"<leader>fa",
-				":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>"
-			)
-		end,
-	},
-	{
-		"nvim-telescope/telescope-ui-select.nvim",
-		config = function()
-			require("telescope").setup({
-				extensions = {
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown({}),
-					},
-				},
-			})
-			require("telescope").load_extension("ui-select")
-		end,
-	},
+      return {
+        { "<leader>ff", builtin.find_files, desc = "[F]ind [F]iles" },
+        { "<leader>fF", builtin.git_files, desc = "[F]ind [F]iles (git)" },
+        { "<leader>fg", builtin.live_grep, desc = "[F]ind [G]rep" },
+        { "<leader>fg", grep_visual, mode = "v", desc = "[F]ind [G]rep (selection)" },
+        { "<leader>fc", builtin.git_status, desc = "[F]ind [C]hanged files" },
+        { "<leader>fk", builtin.keymaps, desc = "[F]ind [K]eymaps" },
+        { "<leader>fh", builtin.oldfiles, desc = "[F]ind [H]istory" },
+        {
+          "<leader>fa",
+          function()
+            require("telescope").extensions.live_grep_args.live_grep_args()
+          end,
+          desc = "[F]ind grep with [A]rgs",
+        },
+      }
+    end,
+    config = function()
+      local telescope = require("telescope")
+      telescope.setup({
+        extensions = {
+          ["ui-select"] = { require("telescope.themes").get_dropdown({}) },
+        },
+      })
+      telescope.load_extension("live_grep_args")
+      telescope.load_extension("ui-select")
+    end,
+  },
 }
