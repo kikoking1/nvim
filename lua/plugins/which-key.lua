@@ -10,6 +10,7 @@ return {
       { "<leader>n", group = "[N]eotree" },
       { "<leader>t", group = "[T]erminal" },
       { "<leader>c", group = "[C]opy" },
+      { "<leader>d", group = "[D]ebug" },
     },
   },
   keys = {

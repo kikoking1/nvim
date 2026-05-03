@@ -103,7 +103,7 @@ This config uses [`seblyng/roslyn.nvim`](https://github.com/seblyng/roslyn.nvim)
 
 - `roslyn` — C# / Razor / CSHTML LSP (via the [Crashdummyy registry](https://github.com/Crashdummyy/mason-registry), wired up in `lua/plugins/lsp-config.lua`)
 - `csharpier` — formatter (driven by conform on save)
-- `netcoredbg` — debugger adapter (for nvim-dap if you add it later)
+- `netcoredbg` — debug adapter, wired up in `lua/plugins/dap.lua`
 
 The Roslyn server requires Neovim ≥ 0.12.0. Once installed, it auto-detects `.sln` / `.csproj` upward from your file. Useful commands:
 
@@ -176,10 +176,56 @@ Leader is `<Space>`. Press `<leader>` and pause — `which-key.nvim` will show e
 | `<leader>q` | Toggle quickfix list (`dd` to delete an item) |
 | `<leader>f` | Format buffer (conform.nvim) |
 | `<leader>l*` | LSP family: definition, references, rename, code action, … |
+| `<leader>d*` | Debug (nvim-dap) — see Debugging section below |
 | `[d` / `]d` | Previous / next diagnostic |
 | `K` | Hover documentation |
 
 Full list: `<leader>fk` (Telescope keymaps) or just press `<leader>` and read which-key.
+
+## Debugging (nvim-dap)
+
+Powered by `nvim-dap` + `nvim-dap-ui`. Currently only **C# / .NET** is wired up via `netcoredbg` (installed by Mason). Adding more languages is just a matter of adding adapters and configurations in `lua/plugins/dap.lua`.
+
+### .NET workflow
+
+1. Build your project once: `dotnet build` (in a terminal, or `<leader>th` then `dotnet build`).
+2. Place breakpoints with `<leader>db`.
+3. Press `<F5>` (or `<leader>dc`) to start. If `bin/Debug/net*/*.dll` matches exactly one DLL, it launches automatically; otherwise you'll be prompted for a path.
+4. The dap-ui panels open automatically with stack frames, scopes, breakpoints, watches, and a REPL. They close on session exit.
+
+### Keybindings
+
+| Keys | Action |
+|---|---|
+| `<F5>` / `<leader>dc` | Continue (or start session) |
+| `<F10>` | Step over |
+| `<F11>` | Step into |
+| `<F12>` | Step out |
+| `<leader>db` | Toggle [B]reakpoint |
+| `<leader>dB` | Conditional breakpoint (prompts for condition) |
+| `<leader>dr` | Toggle [R]EPL |
+| `<leader>dt` | [T]erminate session |
+| `<leader>dl` | Run [L]ast configuration |
+| `<leader>du` | Toggle DAP [U]I panels |
+| `<leader>de` | [E]val expression under cursor / selection |
+
+### Two launch configurations
+
+Picked from `:lua require("dap").continue()` (i.e. `<F5>`):
+
+- **Launch (netcoredbg)** — auto-detects the build output DLL and starts a fresh process.
+- **Attach to process** — `dap.utils.pick_process` lets you fuzzy-pick an already-running .NET process (handy for ASP.NET hosts you started outside Neovim).
+
+### Adding more languages later
+
+Drop a new block into `lua/plugins/dap.lua`'s `config` function, e.g.:
+
+```lua
+dap.adapters.delve = { type = "server", port = "${port}", executable = { command = "dlv", args = { "dap", "-l", "127.0.0.1:${port}" } } }
+dap.configurations.go = { { type = "delve", name = "Debug", request = "launch", program = "${workspaceFolder}" } }
+```
+
+Mason has DAP adapters for most languages (`delve`, `debugpy`, `js-debug-adapter`, `codelldb`, etc.) — install with `:MasonInstall <name>` then wire up the adapter and configurations.
 
 ## Updating
 
