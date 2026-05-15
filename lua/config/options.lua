@@ -15,6 +15,7 @@ opt.number = true
 opt.relativenumber = true
 opt.signcolumn = "yes"
 opt.mouse = "a"
+opt.termguicolors = true
 
 opt.wrap = true
 opt.linebreak = false
