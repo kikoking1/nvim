@@ -16,7 +16,7 @@ opt.relativenumber = true
 opt.signcolumn = "yes"
 opt.mouse = "a"
 
-opt.wrap = false
+opt.wrap = true
 opt.linebreak = false
 opt.swapfile = false
 

@@ -19,19 +19,19 @@ map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 map("t", "<Esc>", "<C-\\><C-n>", { desc = "Terminal: enter normal mode" })
 
 -- Quickfix toggle (open last list, or close if open)
-map("n", "<leader>q", function()
-  for _, win in pairs(vim.fn.getwininfo()) do
-    if win.quickfix == 1 then
-      vim.cmd("cclose")
-      return
-    end
-  end
-  vim.cmd("botright copen")
+map("n", "<leader>qf", function()
+	for _, win in pairs(vim.fn.getwininfo()) do
+		if win.quickfix == 1 then
+			vim.cmd("cclose")
+			return
+		end
+	end
+	vim.cmd("botright copen")
 end, { desc = "Toggle quickfix list" })
 
 -- Copy current buffer's absolute path to clipboard
-map("n", "<leader>cf", function()
-  local filepath = vim.fn.expand("%:p")
-  vim.fn.setreg("+", filepath)
-  vim.fn.setreg('"', filepath)
+map("n", "<leader>fc", function()
+	local filepath = vim.fn.expand("%:p")
+	vim.fn.setreg("+", filepath)
+	vim.fn.setreg('"', filepath)
 end, { desc = "Copy current buffer path" })
