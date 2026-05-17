@@ -60,6 +60,16 @@ return {
     },
   },
 
+  -- vscode-eslint-language-server. Runs once per workspace and stays alive
+  -- for the entire nvim session, which is what makes save-time auto-fixing
+  -- fast (matches VSCode's `editor.codeActionsOnSave["source.fixAll.eslint"]`).
+  -- The BufWritePre hook that triggers EslintFixAll lives in lua/lsp/on_attach.lua.
+  eslint = {
+    settings = {
+      workingDirectories = { mode = "auto" },
+    },
+  },
+
   -- The Prisma LSP also handles `.prisma` schema formatting, so we let
   -- conform.nvim fall through to the LSP for `prisma` files.
   prismals = {},

@@ -77,6 +77,24 @@ local function on_attach(event)
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = buf }), { bufnr = buf })
     end, "Toggle inlay [H]ints")
   end
+
+  -- ESLint: auto-fix on save via the LSP, equivalent to VSCode's
+  -- `source.fixAll.eslint`. The command is defined by nvim-lspconfig when the
+  -- eslint client attaches; it runs synchronously and finishes in ~50-100ms
+  -- once the server is warm.
+  if client.name == "eslint" then
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      group = vim.api.nvim_create_augroup("eslint-fix-on-save-" .. buf, { clear = true }),
+      buffer = buf,
+      callback = function()
+        if vim.fn.exists(":LspEslintFixAll") > 0 then
+          vim.cmd("LspEslintFixAll")
+        elseif vim.fn.exists(":EslintFixAll") > 0 then
+          vim.cmd("EslintFixAll")
+        end
+      end,
+    })
+  end
 end
 
 function M.setup()

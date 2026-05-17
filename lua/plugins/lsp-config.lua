@@ -43,8 +43,7 @@ return {
       require("mason-tool-installer").setup({
         ensure_installed = {
           "stylua",
-          "prettier",
-          "eslint_d",
+          "prettierd", -- daemonised prettier; eliminates the ~1s Node spinup per save
           "golangci-lint", -- Go linter, driven by nvim-lint
           "csharpier",
           "netcoredbg",
