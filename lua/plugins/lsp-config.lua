@@ -10,7 +10,7 @@ return {
       "WhoIsSethDaniel/mason-tool-installer.nvim",
       { "j-hui/fidget.nvim", opts = {} },
       { "folke/neodev.nvim", opts = {} },
-      "hrsh7th/cmp-nvim-lsp",
+      "saghen/blink.cmp",
     },
     config = function()
       require("lsp.diagnostics")
@@ -18,10 +18,9 @@ return {
 
       local servers = require("lsp.servers")
 
-      -- Make completion capabilities the default for every server. nvim-cmp
+      -- Make completion capabilities the default for every server. blink.cmp
       -- needs this to advertise snippet/completion support to language servers.
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", { capabilities = capabilities })
 
       for name, opts in pairs(servers) do
@@ -46,6 +45,7 @@ return {
           "stylua",
           "prettier",
           "eslint_d",
+          "golangci-lint", -- Go linter, driven by nvim-lint
           "csharpier",
           "netcoredbg",
           "roslyn", -- C# LSP, configured by lua/plugins/roslyn.lua
