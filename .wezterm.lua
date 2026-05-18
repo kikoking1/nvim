@@ -50,7 +50,7 @@ config.font_size = 14.0
 config.background = {
 	{
 		source = {
-			File = "/Users/kikocarisse/Desktop/wallpapersden.com_shigeo-kageyama-hd-mob-psycho-100-cool_2998x2399.jpg",
+			File = "/Users/kikocarisse/.config/nvim/wallpaper.jpg",
 		},
 		-- Correct way to scale without warping
 		width = "Cover",
