@@ -12,6 +12,17 @@ return {
     -- Search upward for solutions even if the .sln lives above your cwd.
     broad_search = true,
     silent = false,
+    -- Disable the Razor extension. roslyn.nvim's defaults pass
+    --   --razorSourceGenerator=... --razorDesignTimePath=...
+    -- to the Roslyn server. The Mason-shipped server we use
+    -- (`5.8.0-1.26262.10`, Crashdummyy registry) does NOT recognize those
+    -- flags and exits with code 1, which kills LSP for all C# files. If
+    -- you start working on .razor/.cshtml files and need Razor support,
+    -- upgrade the Roslyn package via Mason to a build that accepts those
+    -- args, then re-enable this extension.
+    extensions = {
+      razor = { enabled = false },
+    },
   },
   config = function(_, opts)
     -- Per-server settings go through vim.lsp.config; the plugin itself only

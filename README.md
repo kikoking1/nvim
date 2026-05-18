@@ -8,7 +8,7 @@ If you have Homebrew, the following one block installs everything most users wil
 
 ```bash
 # Required
-brew install neovim git ripgrep fd
+brew install neovim git ripgrep fd tree-sitter-cli
 
 # Recommended
 brew install lazygit
@@ -37,6 +37,7 @@ These are needed for the editor itself to load and for core features (find files
 | **Neovim ≥ 0.11** | Uses `vim.lsp.config()` / `vim.lsp.enable()`, `vim.diagnostic.jump`, etc. | `brew install neovim` |
 | **git** | `lazy.nvim` clones plugins, Mason clones some registries | usually preinstalled; `brew install git` otherwise |
 | **C compiler + `make`** | Tree-sitter parsers and LuaSnip's `jsregexp` are built from source | macOS: install Xcode CLT with `xcode-select --install` |
+| **`tree-sitter-cli` ≥ 0.26.1** | Required by `nvim-treesitter` v1.0 (`main` branch) to install/update parsers | `brew install tree-sitter-cli` |
 | **`ripgrep`** | Used by `telescope.live_grep` (`<leader>fg`) | `brew install ripgrep` |
 | **A Nerd Font** | Icons in Neo-tree, Lualine, Alpha dashboard, etc. (`have_nerd_font = true`) | `brew install --cask font-jetbrains-mono-nerd-font` (or any other) — then set your terminal to use it |
 
@@ -248,7 +249,8 @@ Mason has DAP adapters for most languages (`delve`, `debugpy`, `js-debug-adapter
 ## Troubleshooting
 
 - **`vtsls` / `prettier` / `eslint_d` failed to install** — Mason needs `npm` on `PATH`. Install Node (see above). On macOS, the bundled Cursor/VS Code Node is *not* sufficient because it doesn't include `npm`.
-- **`module 'nvim-treesitter.configs' not found`** — the `nvim-treesitter` repo's `main` branch is the v1.0 rewrite with a different API. This config pins `branch = "master"`. If you ever see this error, run `:Lazy clean` then `:Lazy sync` to re-clone on the correct branch.
+- **`tree-sitter` executable not found** — `nvim-treesitter` v1.0 (`main` branch) requires the `tree-sitter-cli` (>= 0.26.1) on `PATH`. On macOS: `brew install tree-sitter-cli`. Without it, `:TSInstall` / `:TSUpdate` hang without a clear error.
+- **Parser errors after upgrading Neovim** — run `:TSUpdate` to rebuild parsers against the new runtime ABI.
 - **Icons appear as boxes / `?`** — your terminal isn't using a Nerd Font. Set the font in your terminal settings (iTerm2, WezTerm, Ghostty, etc.).
 - **`gopls` not formatting on save** — make sure `go` is on `PATH` for the shell that launched Neovim. Check with `:LspInfo`.
 - **`roslyn` failed to install / not found** — Mason needs the Crashdummyy registry to find this package. It's registered in `lua/plugins/lsp-config.lua`; if you're seeing the error, run `:MasonUpdate` once after first launch so the new registry is fetched, then `:MasonInstall roslyn`. Also confirm `dotnet --info` works in your shell.
