@@ -1,7 +1,8 @@
 return {
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.6",
+    -- Track master: tag 0.1.6 calls make_position_params() without
+    -- position_encoding, which Neovim 0.11+ warns about on LSP pickers.
     cmd = "Telescope",
     dependencies = {
       "nvim-lua/plenary.nvim",
