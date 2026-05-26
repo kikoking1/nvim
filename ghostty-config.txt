@@ -1,0 +1,32 @@
+command = /usr/bin/zsh
+
+# Set the absolute or relative path to your image
+background-image = /home/kiko/.config/nvim/wallpaper.jpg
+
+# Set the opacity between 0.0 (invisible) and 1.0 (fully opaque)
+background-image-opacity = 0.02
+
+# Optional: Control how the image scales (cover, contain, stretch, or none)
+background-image-fit = cover
+
+# Force the cursor shape and blink
+cursor-style = block
+#cursor-style-blink = true
+
+# Prevent your shell integration from overriding the cursor style
+shell-integration-features = no-cursor
+
+cursor-color = #7aa2f7
+cursor-text = #1a1b26
+
+# Optional: Adjust the opacity of the cursor (0.0 to 1.0)
+cursor-opacity = 0.8
+
+background-opacity = 0.98
+
+# Enable the quick terminal and set its position
+quick-terminal-position = top
+
+# Set a global hotkey to toggle it from anywhere in your OS
+keybind = global:ctrl+t=toggle_quick_terminal
+
