@@ -18,6 +18,7 @@ brew install --cask font-jetbrains-mono-nerd-font   # any Nerd Font works
 brew install go                 # Go LSP (gopls)
 brew install nvm                # Node.js manager — see Node section below
 brew install --cask dotnet-sdk  # C# (roslyn, csharpier, netcoredbg)
+brew install zig                # Zig toolchain (zls is installed via Mason)
 
 # Clone this repo into the standard config location
 git clone <this-repo> ~/.config/nvim
@@ -119,6 +120,14 @@ If you're migrating from this config's previous OmniSharp setup, uninstall the l
 ```vim
 :MasonUninstall omnisharp
 ```
+
+#### Zig
+
+```bash
+brew install zig
+```
+
+Mason installs `zls` (the Zig Language Server) automatically. ZLS publishes diagnostics natively, so there's no separate linter wired up. Formatting on save runs `zig fmt --stdin` via conform's built-in `zigfmt` formatter, which means **`zig` must be on `PATH`** for format-on-save to work. ZLS settings (inlay hints, build-on-save, etc.) live in `lua/lsp/servers.lua`.
 
 #### Lua
 

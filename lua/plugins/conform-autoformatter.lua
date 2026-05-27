@@ -42,6 +42,9 @@ return {
 			javascriptreact = { "prettierd" },
 			typescript = { "prettierd" },
 			typescriptreact = { "prettierd" },
+			-- `zigfmt` is conform's wrapper around `zig fmt --stdin`. Requires
+			-- `zig` on PATH (the same toolchain ZLS shells out to).
+			zig = { "zigfmt" },
 		},
 		formatters = {
 			csharpier = {

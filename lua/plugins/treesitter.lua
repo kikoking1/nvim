@@ -35,6 +35,7 @@ return {
       "vim",
       "vimdoc",
       "prisma",
+      "zig",
       "json",
       "yaml",
       "markdown",
