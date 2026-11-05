@@ -1,6 +1,24 @@
 # Neovim config
 
-Personal Neovim setup built on [`lazy.nvim`](https://github.com/folke/lazy.nvim) and [`mason.nvim`](https://github.com/williamboman/mason.nvim). Tested on Neovim 0.11+ (developed against 0.12).
+Personal Neovim setup built on [`lazy.nvim`](https://github.com/folke/lazy.nvim) and [`mason.nvim`](https://github.com/mason-org/mason.nvim). Requires Neovim 0.12+ (`nvim-treesitter` `main` and `roslyn.nvim` both need it).
+
+## Quick start (Arch Linux / CachyOS)
+
+```bash
+# Required
+sudo pacman -S neovim git ripgrep fd tree-sitter-cli base-devel
+nvim --version | head -1   # must be 0.12+; if not, `paru -S neovim-git` (AUR)
+
+# Recommended
+sudo pacman -S lazygit wl-clipboard ttf-nerd-fonts-symbols   # xclip instead of wl-clipboard on X11
+
+# Per-language (install only what you use)
+sudo pacman -S go dotnet-sdk zig
+# Node.js: use nvm (see the Node section below) or `sudo pacman -S nodejs npm`
+
+git clone <this-repo> ~/.config/nvim
+nvim   # lazy.nvim will bootstrap and install plugins on first launch
+```
 
 ## Quick start (macOS)
 
@@ -35,19 +53,20 @@ These are needed for the editor itself to load and for core features (find files
 
 | Tool | Why | Install |
 |---|---|---|
-| **Neovim ≥ 0.11** | Uses `vim.lsp.config()` / `vim.lsp.enable()`, `vim.diagnostic.jump`, etc. | `brew install neovim` |
-| **git** | `lazy.nvim` clones plugins, Mason clones some registries | usually preinstalled; `brew install git` otherwise |
-| **C compiler + `make`** | Tree-sitter parsers and LuaSnip's `jsregexp` are built from source | macOS: install Xcode CLT with `xcode-select --install` |
-| **`tree-sitter-cli` ≥ 0.26.1** | Required by `nvim-treesitter` v1.0 (`main` branch) to install/update parsers | `brew install tree-sitter-cli` |
-| **`ripgrep`** | Used by `telescope.live_grep` (`<leader>fg`) | `brew install ripgrep` |
-| **A Nerd Font** | Icons in Neo-tree, Lualine, Alpha dashboard, etc. (`have_nerd_font = true`) | `brew install --cask font-jetbrains-mono-nerd-font` (or any other) — then set your terminal to use it |
+| **Neovim ≥ 0.12** | Uses `vim.lsp.config()` / `vim.lsp.enable()`, `vim.diagnostic.jump`; required by `nvim-treesitter` `main` and `roslyn.nvim` | `pacman -S neovim` / `brew install neovim` |
+| **git** | `lazy.nvim` clones plugins, Mason clones some registries | `pacman -S git` / `brew install git` |
+| **C compiler + `make`** | Tree-sitter parsers and LuaSnip's `jsregexp` are built from source | Arch: `pacman -S base-devel`; macOS: `xcode-select --install` |
+| **`tree-sitter-cli` ≥ 0.26.1** | Required by `nvim-treesitter` v1.0 (`main` branch) to install/update parsers | `pacman -S tree-sitter-cli` / `brew install tree-sitter-cli` |
+| **`ripgrep`** | Used by `telescope.live_grep` (`<leader>fg`) | `pacman -S ripgrep` / `brew install ripgrep` |
+| **A Nerd Font** | Icons in Neo-tree, Lualine, Alpha dashboard, etc. | `pacman -S ttf-nerd-fonts-symbols` / `brew install --cask font-jetbrains-mono-nerd-font` (or any other) — then set your terminal to use it |
 
 ### Recommended
 
 | Tool | Why | Install |
 |---|---|---|
-| **`fd`** | Faster file finding for `telescope.find_files` (`<leader>ff`) | `brew install fd` |
-| **`lazygit`** | Bound to `<leader>tg` (opens lazygit in a floating terminal) | `brew install lazygit` |
+| **`fd`** | Faster file finding for `telescope.find_files` (`<leader>ff`) | `pacman -S fd` / `brew install fd` |
+| **`lazygit`** | Bound to `<leader>tg` (opens lazygit in a floating terminal) | `pacman -S lazygit` / `brew install lazygit` |
+| **Clipboard tool** (Linux only) | System clipboard for `<leader>y` / `<leader>p` (`"+` register) | Wayland: `pacman -S wl-clipboard`; X11: `pacman -S xclip`. macOS has this built in |
 
 ### Per-language
 
@@ -58,9 +77,9 @@ You only need these for the languages you actually edit. The Mason-installed too
 Requires **Node.js + npm** so Mason can install:
 
 - `vtsls` — TypeScript/JavaScript LSP
-- `prettier` — formatter
-- `eslint_d` — fast ESLint daemon (only runs in projects that have an ESLint config)
-- `prisma-fmt` — Prisma schema formatter
+- `prettierd` — daemonised Prettier, run by conform on save
+- `eslint` (`vscode-eslint-language-server`) — ESLint diagnostics + fix-all on save (only activates in projects that have an ESLint config)
+- `prismals` — Prisma LSP, which also formats `.prisma` files
 
 **Install Node via nvm (recommended):**
 
@@ -131,7 +150,7 @@ Mason installs `zls` (the Zig Language Server) automatically. ZLS publishes diag
 
 #### Lua
 
-Mason installs `lua_ls` and `stylua`. No system dependency.
+Mason installs `lua_ls` and `stylua`. No system dependency. [`lazydev.nvim`](https://github.com/folke/lazydev.nvim) provides Neovim API / plugin types to `lua_ls` when editing Lua files.
 
 ## First-launch checklist
 
@@ -171,7 +190,7 @@ lua/
 
 ## Keybindings
 
-Leader is `<Space>`. Press `<leader>` and pause — `which-key.nvim` will show every available binding. A few highlights:
+Leader is `<Space>`. A few highlights:
 
 | Keys | Action |
 |---|---|
@@ -183,14 +202,16 @@ Leader is `<Space>`. Press `<leader>` and pause — `which-key.nvim` will show e
 | `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |
 | `<leader>gh` / `<leader>gb` | Gitsigns: preview hunk / toggle blame |
 | `<leader>tf` / `<leader>th` / `<leader>tg` | Toggleterm: float / horizontal / lazygit |
-| `<leader>q` | Toggle quickfix list (`dd` to delete an item) |
+| `<leader>qf` | Toggle quickfix list (`dd` to delete an item) |
+| `<leader>cp` | Copy the current buffer's absolute path |
+| `gcc` / `gc{motion}` | Toggle comments (built into Neovim) |
 | `<leader>f` | Format buffer (conform.nvim) |
 | `<leader>l*` | LSP family: definition, references, rename, code action, … |
 | `<leader>d*` | Debug (nvim-dap) — see Debugging section below |
 | `[d` / `]d` | Previous / next diagnostic |
 | `K` | Hover documentation |
 
-Full list: `<leader>fk` (Telescope keymaps) or just press `<leader>` and read which-key.
+Full list: `<leader>fk` (Telescope keymaps).
 
 ## Debugging (nvim-dap)
 
@@ -250,15 +271,16 @@ Mason has DAP adapters for most languages (`delve`, `debugpy`, `js-debug-adapter
 ## Updating
 
 ```vim
-:Lazy sync          " update all plugins to lazy-lock.json's latest pull
+:Lazy update        " update plugins and write the new versions to lazy-lock.json
+:Lazy restore       " (alternative) roll plugins back to what lazy-lock.json pins
 :Mason              " then U to update LSPs/formatters
 :TSUpdate           " update Tree-sitter parsers
 ```
 
 ## Troubleshooting
 
-- **`vtsls` / `prettier` / `eslint_d` failed to install** — Mason needs `npm` on `PATH`. Install Node (see above). On macOS, the bundled Cursor/VS Code Node is *not* sufficient because it doesn't include `npm`.
-- **`tree-sitter` executable not found** — `nvim-treesitter` v1.0 (`main` branch) requires the `tree-sitter-cli` (>= 0.26.1) on `PATH`. On macOS: `brew install tree-sitter-cli`. Without it, `:TSInstall` / `:TSUpdate` hang without a clear error.
+- **`vtsls` / `prettierd` / `eslint` failed to install** — Mason needs `npm` on `PATH`. Install Node (see above). On macOS, the bundled Cursor/VS Code Node is *not* sufficient because it doesn't include `npm`.
+- **`tree-sitter` executable not found** — `nvim-treesitter` v1.0 (`main` branch) requires the `tree-sitter-cli` (>= 0.26.1) on `PATH`. Install it with `pacman -S tree-sitter-cli` or `brew install tree-sitter-cli`. Without it, `:TSInstall` / `:TSUpdate` hang without a clear error.
 - **Parser errors after upgrading Neovim** — run `:TSUpdate` to rebuild parsers against the new runtime ABI.
 - **Icons appear as boxes / `?`** — your terminal isn't using a Nerd Font. Set the font in your terminal settings (iTerm2, WezTerm, Ghostty, etc.).
 - **`gopls` not formatting on save** — make sure `go` is on `PATH` for the shell that launched Neovim. Check with `:LspInfo`.

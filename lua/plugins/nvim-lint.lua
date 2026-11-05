@@ -19,8 +19,10 @@ return {
 			end
 		end
 
+		-- No InsertLeave trigger: golangci-lint reads files from disk, so linting
+		-- unsaved edits just re-runs a slow whole-package lint on stale content.
 		local group = vim.api.nvim_create_augroup("nvim-lint", { clear = true })
-		vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
+		vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
 			group = group,
 			callback = try_lint,
 		})

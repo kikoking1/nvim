@@ -25,13 +25,18 @@ local function on_attach(event)
     return
   end
 
-  local telescope = require("telescope.builtin")
+  -- Resolve telescope lazily so attaching an LSP doesn't force-load it.
+  local function picker(name)
+    return function()
+      require("telescope.builtin")[name]()
+    end
+  end
 
-  buf_map(buf, "<leader>li", telescope.lsp_implementations, "[I]mplementation")
-  buf_map(buf, "<leader>ld", telescope.lsp_definitions, "[D]efinition")
-  buf_map(buf, "<leader>lr", telescope.lsp_references, "[R]eferences")
-  buf_map(buf, "<leader>lt", telescope.lsp_type_definitions, "[T]ype definition")
-  buf_map(buf, "<leader>ls", telescope.lsp_document_symbols, "Document [S]ymbols")
+  buf_map(buf, "<leader>li", picker("lsp_implementations"), "[I]mplementation")
+  buf_map(buf, "<leader>ld", picker("lsp_definitions"), "[D]efinition")
+  buf_map(buf, "<leader>lr", picker("lsp_references"), "[R]eferences")
+  buf_map(buf, "<leader>lt", picker("lsp_type_definitions"), "[T]ype definition")
+  buf_map(buf, "<leader>ls", picker("lsp_document_symbols"), "Document [S]ymbols")
   buf_map(buf, "<leader>lR", vim.lsp.buf.rename, "[R]ename")
   buf_map(buf, "<leader>la", vim.lsp.buf.code_action, "Code [A]ction")
   buf_map(buf, "<leader>lD", vim.lsp.buf.declaration, "Goto [D]eclaration")
@@ -79,18 +84,17 @@ local function on_attach(event)
   end
 
   -- ESLint: auto-fix on save via the LSP, equivalent to VSCode's
-  -- `source.fixAll.eslint`. The command is defined by nvim-lspconfig when the
-  -- eslint client attaches; it runs synchronously and finishes in ~50-100ms
-  -- once the server is warm.
+  -- `source.fixAll.eslint`. `LspEslintFixAll` is a buffer-local command
+  -- defined by nvim-lspconfig when the eslint client attaches; it runs
+  -- synchronously and finishes in ~50-100ms once the server is warm.
   if client.name == "eslint" then
     vim.api.nvim_create_autocmd("BufWritePre", {
       group = vim.api.nvim_create_augroup("eslint-fix-on-save-" .. buf, { clear = true }),
       buffer = buf,
       callback = function()
-        if vim.fn.exists(":LspEslintFixAll") > 0 then
+        -- Guard against the client having detached since this was registered.
+        if vim.fn.exists(":LspEslintFixAll") == 2 then
           vim.cmd("LspEslintFixAll")
-        elseif vim.fn.exists(":EslintFixAll") > 0 then
-          vim.cmd("EslintFixAll")
         end
       end,
     })

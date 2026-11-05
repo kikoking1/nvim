@@ -9,8 +9,8 @@
 --     hence `lazy = false`. The plugin itself is small; actual treesitter
 --     work happens in the FileType autocmd below, so the startup cost is
 --     bounded by the filetypes you actually open.
---   * Requires `tree-sitter-cli` >= 0.26.1 on $PATH (installed here via
---     `brew install tree-sitter-cli`).
+--   * Requires Neovim 0.12+ and `tree-sitter-cli` >= 0.26.1 on $PATH
+--     (`pacman -S tree-sitter-cli` / `brew install tree-sitter-cli`).
 --
 -- Refs: https://github.com/nvim-treesitter/nvim-treesitter/blob/main/README.md
 return {

@@ -6,9 +6,9 @@ return {
 		{
 			"<leader>f",
 			function()
-				require("conform").format({ async = true, lsp_fallback = true })
+				require("conform").format({ async = true, lsp_format = "fallback" })
 			end,
-			mode = { "n", "v" },
+			mode = { "n", "x" },
 			desc = "[F]ormat buffer",
 		},
 	},
@@ -28,11 +28,14 @@ return {
 			}
 			return {
 				timeout_ms = 2000,
-				lsp_fallback = not skip_lsp_fallback[vim.bo[bufnr].filetype],
+				lsp_format = skip_lsp_fallback[vim.bo[bufnr].filetype] and "never" or "fallback",
 			}
 		end,
 		formatters_by_ft = {
 			lua = { "stylua" },
+			-- conform's built-in csharpier definition targets the 1.x CLI
+			-- (`csharpier format`), which is what Mason installs. It also
+			-- prefers a project-local `dotnet csharpier` tool when present.
 			cs = { "csharpier" },
 			-- prisma intentionally omitted: format_on_save above falls through
 			-- to the prismals LSP, which handles .prisma formatting itself.
@@ -45,12 +48,6 @@ return {
 			-- `zigfmt` is conform's wrapper around `zig fmt --stdin`. Requires
 			-- `zig` on PATH (the same toolchain ZLS shells out to).
 			zig = { "zigfmt" },
-		},
-		formatters = {
-			csharpier = {
-				command = "dotnet-csharpier",
-				args = { "--write-stdout" },
-			},
 		},
 	},
 }

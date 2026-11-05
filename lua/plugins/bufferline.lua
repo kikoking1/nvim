@@ -8,7 +8,7 @@ return {
 		{ "<S-h>", "<cmd>BufferLineCyclePrev<CR>", desc = "Prev buffer" },
 		{ "<M-H>", "<cmd>BufferLineMovePrev<CR>", desc = "Move buffer left" },
 		{ "<M-L>", "<cmd>BufferLineMoveNext<CR>", desc = "Move buffer right" },
-		{ "<M-D>", ":bp|bd #<CR>", desc = "Close current buffer" },
+		{ "<M-D>", "<cmd>bp|bd #<CR>", desc = "Close current buffer" },
 		-- { "<leader>bp", "<cmd>BufferLinePick<CR>", desc = "Pick buffer" },
 		-- { "<leader>bc", "<cmd>BufferLinePickClose<CR>", desc = "Pick buffer to close" },
 	},

@@ -36,7 +36,16 @@ return {
 		},
 		snippets = { preset = "luasnip" },
 		sources = {
-			default = { "lsp", "snippets", "path", "buffer" },
+			default = { "lazydev", "lsp", "snippets", "path", "buffer" },
+			providers = {
+				-- Only active in Lua buffers (lazydev is ft-loaded); ranked above
+				-- lua_ls so `require("...")` module completions come first.
+				lazydev = {
+					name = "LazyDev",
+					module = "lazydev.integrations.blink",
+					score_offset = 100,
+				},
+			},
 		},
 		completion = {
 			-- Match the old completeopt = "menu,menuone,noinsert" behaviour:

@@ -7,9 +7,7 @@ autocmd("TextYankPost", {
   desc = "Briefly highlight yanked text",
   group = augroup("highlight-yank", { clear = true }),
   callback = function()
-    -- vim.hl is the new namespace in 0.11+; fall back to vim.highlight.
-    local hl = vim.hl or vim.highlight
-    hl.on_yank()
+    vim.hl.on_yank()
   end,
 })
 
@@ -22,9 +20,10 @@ local function remove_qf_item()
   end
   table.remove(items, idx)
   vim.fn.setqflist(items, "r")
-  -- Refresh the qf window so the cursor stays on a valid entry.
+  -- Keep the cursor on a valid entry without jumping out of the qf window
+  -- (`:cc` would open the entry and move focus to the file).
   if #items > 0 then
-    vim.cmd(("%d cc"):format(math.min(idx, #items)))
+    vim.api.nvim_win_set_cursor(0, { math.min(idx, #items), 0 })
   end
 end
 

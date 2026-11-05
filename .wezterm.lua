@@ -11,7 +11,7 @@ config.window_padding = {
 
 wezterm.on("gui-startup", function(cmd)
   -- Allow `wezterm start -- something` to affect what we spawn
-  local tab, pane, window = mux.spawn_window(cmd or {})
+  local _, _, window = mux.spawn_window(cmd or {})
 
   -- Maximize the window
   window:gui_window():maximize()
@@ -50,7 +50,8 @@ config.font_size = 14.0
 config.background = {
   {
     source = {
-      File = "/home/kiko/.config/nvim/wallpaper.jpg",
+      -- Resolved from $HOME so the same file works across machines/usernames.
+      File = wezterm.home_dir .. "/.config/nvim/wallpaper.jpg",
     },
     -- Correct way to scale without warping
     width = "Cover",

@@ -34,7 +34,7 @@ return {
           require("dapui").eval(nil, { enter = true })
         end,
         desc = "DAP: [E]val expression",
-        mode = { "n", "v" },
+        mode = { "n", "x" },
       },
     },
     config = function()

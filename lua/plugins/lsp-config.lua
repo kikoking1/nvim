@@ -5,11 +5,13 @@ return {
     dependencies = {
       -- mason.nvim is configured below (not via `config = true`) so we can
       -- register the Crashdummyy registry that ships the Roslyn LSP package.
-      "williamboman/mason.nvim",
-      { "williamboman/mason-lspconfig.nvim", version = "^2" },
+      "mason-org/mason.nvim",
+      { "mason-org/mason-lspconfig.nvim", version = "^2" },
       "WhoIsSethDaniel/mason-tool-installer.nvim",
       { "j-hui/fidget.nvim", opts = {} },
-      { "folke/neodev.nvim", opts = {} },
+      -- Loaded before any server starts so its plugin/ file can register
+      -- completion capabilities via vim.lsp.config("*", ...) (blink does this
+      -- itself on Neovim 0.11+; no manual get_lsp_capabilities() needed).
       "saghen/blink.cmp",
     },
     config = function()
@@ -17,11 +19,6 @@ return {
       require("lsp.on_attach").setup()
 
       local servers = require("lsp.servers")
-
-      -- Make completion capabilities the default for every server. blink.cmp
-      -- needs this to advertise snippet/completion support to language servers.
-      local capabilities = require("blink.cmp").get_lsp_capabilities()
-      vim.lsp.config("*", { capabilities = capabilities })
 
       for name, opts in pairs(servers) do
         vim.lsp.config(name, opts)
@@ -55,13 +52,29 @@ return {
       })
 
       -- mason-lspconfig v2 calls vim.lsp.enable() automatically for any server
-      -- it knows is installed, picking up the configs registered above. We
-      -- exclude omnisharp explicitly so it never re-attaches alongside roslyn
-      -- if the package is ever (re)installed.
+      -- it knows is installed, picking up the configs registered above.
+      --   * omnisharp: never re-attach alongside roslyn if it's (re)installed.
+      --   * stylua: nvim-lspconfig ships a `stylua --lsp` config, so the Mason
+      --     formatter package would otherwise also start as an LSP client.
+      --     conform already runs stylua on save.
       require("mason-lspconfig").setup({
         ensure_installed = vim.tbl_keys(servers),
-        automatic_enable = { exclude = { "omnisharp" } },
+        automatic_enable = { exclude = { "omnisharp", "stylua" } },
       })
     end,
+  },
+
+  -- Replaces the archived neodev.nvim: Neovim runtime + plugin types for
+  -- lua_ls, scoped to Lua buffers. Its completion source is wired into
+  -- blink.cmp in lua/plugins/completions.lua.
+  {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {
+      library = {
+        -- Load luvit types when `vim.uv` is referenced.
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
   },
 }

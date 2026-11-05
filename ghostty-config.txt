@@ -1,7 +1,7 @@
 command = /usr/bin/zsh
 
 # Set the absolute or relative path to your image
-background-image = /home/kiko/.config/nvim/wallpaper.jpg
+background-image = ~/.config/nvim/wallpaper.jpg
 
 # Set the opacity between 0.0 (invisible) and 1.0 (fully opaque)
 background-image-opacity = 0.02
