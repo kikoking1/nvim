@@ -47,6 +47,10 @@ config.font_rules = {
 -- Adjust font size to your liking
 config.font_size = 14.0
 
+-- Send distinct codes for Ctrl+key combos like Ctrl+` (Neovim toggles its
+-- terminal with it). Without this, Ctrl+` arrives as NUL.
+config.enable_kitty_keyboard = true
+
 config.background = {
   {
     source = {

@@ -201,7 +201,7 @@ Leader is `<Space>`. A few highlights:
 | `<A-j>` `<A-k>` `<A-l>` `<A-n>` | Jump to Harpoon files 1–4 |
 | `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |
 | `<leader>gh` / `<leader>gb` | Gitsigns: preview hunk / toggle blame |
-| `<leader>tf` / `<leader>th` / `<leader>tg` | Toggleterm: float / horizontal / lazygit |
+| `` <C-`> `` / `<leader>tf` / `<leader>tg` | Toggleterm: horizontal / float / lazygit |
 | `<leader>qf` | Toggle quickfix list (`dd` to delete an item) |
 | `<leader>cp` | Copy the current buffer's absolute path |
 | `gcc` / `gc{motion}` | Toggle comments (built into Neovim) |
@@ -219,7 +219,7 @@ Powered by `nvim-dap` + `nvim-dap-ui`. Currently only **C# / .NET** is wired up 
 
 ### .NET workflow
 
-1. Build your project: `dotnet build` (in a terminal, or `<leader>th` then `dotnet build`).
+1. Build your project: `dotnet build` (in a terminal, or `` <C-`> `` then `dotnet build`).
 2. Place breakpoints with `<leader>db`.
 3. Press `<F5>` (or `<leader>dc`) to start.
 4. The dap-ui panels open automatically with stack frames, scopes, breakpoints, watches, and a REPL. They close on session exit.
