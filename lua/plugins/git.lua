@@ -14,6 +14,16 @@ return {
     keys = {
       { "<leader>gh", "<cmd>Gitsigns preview_hunk<cr>", desc = "[G]it preview [H]unk" },
       { "<leader>gb", "<cmd>Gitsigns toggle_current_line_blame<cr>", desc = "[G]it toggle [B]lame" },
+      -- stage_hunk toggles: on an already-staged hunk it unstages it.
+      { "<leader>gS", "<cmd>Gitsigns stage_hunk<cr>", desc = "[G]it [S]tage/unstage hunk" },
+      {
+        "<leader>gS",
+        function()
+          require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+        end,
+        mode = "x",
+        desc = "[G]it [S]tage/unstage selected lines",
+      },
     },
   },
   {
