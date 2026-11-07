@@ -8,26 +8,41 @@ local M = {}
 local bar = nil
 local tree_win = nil
 
+local items = {
+	{ name = "filesystem", icon = "\u{eaf0}" }, -- nf-cod-files
+	{ name = "git_status", icon = "\u{ea68}" }, -- nf-cod-source_control
+}
+
+-- Show source (nil: just refocus) in neo-tree.
+local function select(source)
+	if source then
+		vim.cmd("Neotree show left " .. source)
+	end
+	-- neo-tree reuses its window when switching sources, but doesn't move the
+	-- cursor into it when called from another window
+	if tree_win and vim.api.nvim_win_is_valid(tree_win) then
+		vim.api.nvim_set_current_win(tree_win)
+	end
+end
+
 local function get_bar()
-	bar = bar
-		or require("sidebar").new({
-			filetype = "activity-bar",
-			items = {
-				{ name = "filesystem", icon = "\u{eaf0}" }, -- nf-cod-files
-				{ name = "git_status", icon = "\u{ea68}" }, -- nf-cod-source_control
-			},
-			on_select = function(source)
-				if source then
-					vim.cmd("Neotree show left " .. source)
-				end
-				-- neo-tree reuses its window when switching sources, but doesn't
-				-- move the cursor into it when called from another window
-				if tree_win and vim.api.nvim_win_is_valid(tree_win) then
-					vim.api.nvim_set_current_win(tree_win)
-				end
-			end,
-		})
+	bar = bar or require("sidebar").new({ filetype = "activity-bar", items = items, on_select = select })
 	return bar
+end
+
+-- Move delta icons down (1) or up (-1) the bar from the current source,
+-- stopping at the ends. Mapped to J / K in neo-tree.
+function M.step(delta)
+	local current = bar and bar.current
+	for i, item in ipairs(items) do
+		if item.name == current then
+			local target = items[i + delta]
+			if target then
+				select(target.name)
+			end
+			return
+		end
+	end
 end
 
 -- neo-tree opened (or switched source) in window win.

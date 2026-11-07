@@ -206,6 +206,8 @@ Leader is `<Space>`. A few highlights:
 | `<leader>ff` / `<leader>fg` | Find files / live grep (Telescope) |
 | `<leader>fa` | Live grep with args (regex, glob, …) |
 | `<leader>nn` / `<leader>nf` | Toggle Neo-tree / reveal current file |
+| `J` / `K` (in Neo-tree) | Switch to the next / previous activity bar view (Files ↔ Git) |
+| `<leader><CR>` (in Neo-tree) | Right-click menu for the file / folder under the cursor |
 | Git view (Git icon left of Neo-tree) | `<CR>` / double-click: diff, `s`: stage / unstage, `d`: discard, right-click: menu |
 | `<leader>a` / `<leader>h` | Harpoon: add / open menu |
 | `<A-j>` `<A-k>` `<A-l>` `<A-n>` | Jump to Harpoon files 1–4 |

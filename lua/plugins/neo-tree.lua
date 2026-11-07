@@ -47,8 +47,10 @@ local function show_menu(node, items)
 	end)
 end
 
-local function context_menu(state)
-	local node = node_at_mouse(state)
+-- at_cursor: opened from the keyboard (<leader><CR>), so use the node under
+-- the cursor rather than the one under the mouse.
+local function context_menu(state, at_cursor)
+	local node = at_cursor and state.tree:get_node() or node_at_mouse(state)
 	if not node then
 		return
 	end
@@ -111,8 +113,8 @@ local function git_discard(state)
 	require("git").discard(state.tree:get_node():get_id())
 end
 
-local function git_context_menu(state)
-	local node = node_at_mouse(state)
+local function git_context_menu(state, at_cursor)
+	local node = at_cursor and state.tree:get_node() or node_at_mouse(state)
 	if not node then
 		return
 	end
@@ -152,6 +154,17 @@ return {
 		{ "<leader>nf", "<cmd>Neotree reveal<cr>", desc = "[N]eotree reveal current [F]ile" },
 	},
 	opts = {
+		-- in every view: J / K move down / up the Files / Git activity bar
+		window = {
+			mappings = {
+				["J"] = function()
+					require("activity-bar").step(1)
+				end,
+				["K"] = function()
+					require("activity-bar").step(-1)
+				end,
+			},
+		},
 		filesystem = {
 			window = {
 				mappings = {
@@ -160,12 +173,18 @@ return {
 					-- Mapping "ff" to our custom find files command below
 					["ff"] = "telescope_find",
 					["<RightMouse>"] = "context_menu",
+					["<leader><cr>"] = "context_menu_at_cursor",
 				},
 			},
 			commands = {
 				telescope_grep = telescope_grep,
 				telescope_find = telescope_find,
-				context_menu = context_menu,
+				context_menu = function(state)
+					context_menu(state)
+				end,
+				context_menu_at_cursor = function(state)
+					context_menu(state, true)
+				end,
 			},
 		},
 		git_status = {
@@ -176,13 +195,19 @@ return {
 					["s"] = "git_toggle_stage",
 					["d"] = "git_discard",
 					["<RightMouse>"] = "git_context_menu",
+					["<leader><cr>"] = "git_context_menu_at_cursor",
 				},
 			},
 			commands = {
 				git_open_diff = git_open_diff,
 				git_toggle_stage = git_toggle_stage,
 				git_discard = git_discard,
-				git_context_menu = git_context_menu,
+				git_context_menu = function(state)
+					git_context_menu(state)
+				end,
+				git_context_menu_at_cursor = function(state)
+					git_context_menu(state, true)
+				end,
 			},
 		},
 		-- Files / Git activity bar to the left of the tree (lua/activity-bar.lua)
