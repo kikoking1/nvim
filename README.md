@@ -185,6 +185,10 @@ lua/
     on_attach.lua           LspAttach: keymaps + features
     servers.lua             per-server settings
   plugins/                  one file per plugin / plugin group
+  panel.lua                 bottom panel (Ctrl+`): sidebar + terminal / debug views
+  terminal-tabs.lua         terminal view: tabbed terminals
+  debug-console.lua         debug view: debug output + step buttons
+  dotnet.lua                run / debug .NET projects (Neo-tree right-click)
   terminal-maximize.lua     toggle full-size for terminal splits
 ```
 
@@ -201,7 +205,8 @@ Leader is `<Space>`. A few highlights:
 | `<A-j>` `<A-k>` `<A-l>` `<A-n>` | Jump to Harpoon files 1–4 |
 | `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |
 | `<leader>gh` / `<leader>gb` | Gitsigns: preview hunk / toggle blame |
-| `` <C-`> `` / `<leader>tf` / `<leader>tg` | Toggleterm: horizontal / float / lazygit |
+| `` <C-`> `` | Toggle the bottom panel (terminal tabs / debug console) |
+| `<leader>tf` / `<leader>tg` | Toggleterm: float / lazygit |
 | `<leader>qf` | Toggle quickfix list (`dd` to delete an item) |
 | `<leader>cp` | Copy the current buffer's absolute path |
 | `gcc` / `gc{motion}` | Toggle comments (built into Neovim) |
@@ -215,14 +220,14 @@ Full list: `<leader>fk` (Telescope keymaps).
 
 ## Debugging (nvim-dap)
 
-Powered by `nvim-dap` + `nvim-dap-ui`. Currently only **C# / .NET** is wired up via `netcoredbg` (installed by Mason). Adding more languages is just a matter of adding adapters and configurations in `lua/plugins/dap.lua`.
+Powered by `nvim-dap`; the UI is the debug view of the bottom panel (`lua/debug-console.lua`). Currently only **C# / .NET** is wired up via `netcoredbg` (installed by Mason). Adding more languages is just a matter of adding adapters and configurations in `lua/plugins/dap.lua`.
 
 ### .NET workflow
 
-1. Build your project: `dotnet build` (in a terminal, or `` <C-`> `` then `dotnet build`).
-2. Place breakpoints with `<leader>db`.
-3. Press `<F5>` (or `<leader>dc`) to start.
-4. The dap-ui panels open automatically with stack frames, scopes, breakpoints, watches, and a REPL. They close on session exit.
+1. Place breakpoints by clicking a line number (or `<leader>db`).
+2. Right-click the project folder in Neo-tree → **Debug .NET project**. It builds, then launches under the debugger. (Or `dotnet build` yourself and press `<F5>`.)
+3. The bottom panel switches to the debug view (bug icon in its sidebar): all debug output, plus Continue / Pause, Step over / into / out, Restart (rebuilds) and Stop buttons. `<F5>` / `<F10>` / `<F11>` / `<F12>` do the same.
+4. `<leader>de` shows the value under the cursor, `<leader>ds` the variables in scope, `<leader>dr` the REPL. Values also show inline as virtual text.
 
 ### How the DLL picker works
 

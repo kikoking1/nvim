@@ -22,26 +22,6 @@ local function telescope_find(state)
 	})
 end
 
--- First *.csproj / *.fsproj directly inside dir, or nil.
-local function find_dotnet_project(dir)
-	for _, pattern in ipairs({ "*.csproj", "*.fsproj" }) do
-		local match = vim.fn.glob(dir .. "/" .. pattern, false, true)[1]
-		if match then
-			return match
-		end
-	end
-end
-
--- Runs in its own tab of the bottom terminal panel. Keyed by project, so
--- re-running restarts it; the tab stays open after exit to keep the output.
-local function dotnet_run(project)
-	require("terminal-tabs").run("dotnet run --project " .. vim.fn.shellescape(project), {
-		name = "run " .. vim.fn.fnamemodify(project, ":t:r"),
-		cwd = vim.fn.fnamemodify(project, ":h"),
-		key = "dotnet:" .. project,
-	})
-end
-
 local function context_menu(state)
 	-- a mapped right-click doesn't move the cursor, so do it here
 	local pos = vim.fn.getmousepos()
@@ -64,9 +44,11 @@ local function context_menu(state)
 	local items
 	if node.type == "directory" then
 		items = {}
-		local project = find_dotnet_project(node:get_id())
+		local dotnet = require("dotnet")
+		local project = dotnet.find_project(node:get_id())
 		if project then
-			table.insert(items, { "Run .NET project", function() dotnet_run(project) end })
+			table.insert(items, { "Run .NET project", function() dotnet.run(project) end })
+			table.insert(items, { "Debug .NET project", function() dotnet.debug(project) end })
 		end
 		vim.list_extend(items, {
 			{ "New file", cmd("add") },

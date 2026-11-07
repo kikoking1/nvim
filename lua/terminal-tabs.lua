@@ -1,16 +1,16 @@
--- VS Code style bottom terminal panel: one split at the bottom holding several
--- terminals, with a clickable tab bar in the winbar ("+" adds a terminal,
--- clicking a tab switches to it, "✕" kills it).
+-- Terminal view of the bottom panel (lua/panel.lua): several terminals with a
+-- clickable tab bar in the winbar ("+" adds a terminal, clicking a tab
+-- switches to it, "✕" kills it).
 --
 -- Shell tabs close themselves when the shell exits. Command tabs (M.run) stay
 -- open after the command exits so its output can still be read.
 
+local panel = require("panel")
+
 local M = {}
 
 local tabs = {} -- ordered list of { id, buf, name, key? }
-local active = nil -- id of the tab shown in the panel
-local win = nil -- panel window, nil when hidden
-local height = 15
+local active = nil -- id of the tab shown in the view
 local next_id = 1
 local shell_count = 0
 
@@ -22,17 +22,10 @@ local function find(id)
 	end
 end
 
-local function panel_open()
-	return win ~= nil and vim.api.nvim_win_is_valid(win)
-end
-
-local function render()
-	if not panel_open() then
-		return
-	end
+function _G.TerminalTabsWinbar()
 	local parts = {}
 	for _, tab in ipairs(tabs) do
-		local hl = tab.id == active and "%#TabLineSel#" or "%#TabLine#"
+		local hl = tab.id == active and "%#PanelTabSel#" or "%#PanelTab#"
 		table.insert(
 			parts,
 			string.format(
@@ -44,25 +37,13 @@ local function render()
 			)
 		)
 	end
-	table.insert(parts, "%#TabLine#%@v:lua.TerminalTabsNew@ + %X%#TabLineFill#")
-	vim.wo[win].winbar = table.concat(parts, "%#TabLineFill# ")
+	table.insert(parts, "%#PanelButton#%@v:lua.TerminalTabsNew@ + %X")
+	return " " .. table.concat(parts, "%#PanelBar# ") .. "%#PanelBar#"
 end
 
 local function show(id)
-	local _, tab = find(id)
-	if not tab then
-		return
-	end
-	if not panel_open() then
-		vim.cmd("botright split")
-		win = vim.api.nvim_get_current_win()
-		vim.api.nvim_win_set_height(win, height)
-		vim.wo[win].winfixheight = true
-	end
-	vim.api.nvim_win_set_buf(win, tab.buf)
-	vim.api.nvim_set_current_win(win)
 	active = id
-	render()
+	panel.show("terminal")
 	vim.cmd("startinsert")
 end
 
@@ -75,13 +56,14 @@ local function remove(id)
 	if active == id then
 		local neighbour = tabs[i] or tabs[i - 1]
 		active = neighbour and neighbour.id
-		if not neighbour then
-			M.hide()
-		elseif panel_open() then
-			show(neighbour.id)
+		if panel.current() == "terminal" then
+			if neighbour then
+				show(neighbour.id)
+			else
+				panel.hide()
+			end
 		end
 	end
-	render()
 end
 
 -- Create a terminal tab. cmd nil means an interactive shell.
@@ -101,7 +83,10 @@ local function create(cmd, opts)
 	table.insert(tabs, { id = id, buf = buf, name = name, key = opts.key })
 	show(id)
 
-	vim.fn.jobstart(cmd or vim.o.shell, { term = true, cwd = opts.cwd })
+	-- start the job in the panel window so it gets the right size
+	vim.api.nvim_win_call(panel.content_win(), function()
+		vim.fn.jobstart(cmd or vim.o.shell, { term = true, cwd = opts.cwd })
+	end)
 
 	vim.api.nvim_create_autocmd("TermClose", {
 		buffer = buf,
@@ -131,7 +116,9 @@ function M.new()
 end
 
 function M.select(id)
-	show(id)
+	if find(id) then
+		show(id)
+	end
 end
 
 -- Kill the tab's process and remove it.
@@ -145,32 +132,6 @@ function M.close(id)
 	if vim.api.nvim_buf_is_valid(buf) then
 		pcall(vim.fn.jobstop, vim.bo[buf].channel)
 		vim.api.nvim_buf_delete(buf, { force = true })
-	end
-end
-
-function M.hide()
-	if not panel_open() then
-		return
-	end
-	height = vim.api.nvim_win_get_height(win)
-	if #vim.api.nvim_tabpage_list_wins(0) > 1 then
-		vim.api.nvim_win_close(win, true)
-	else
-		-- last window: leave an empty buffer rather than quitting
-		vim.api.nvim_win_set_buf(win, vim.api.nvim_create_buf(true, false))
-		vim.wo[win].winbar = ""
-	end
-	win = nil
-end
-
--- Show/hide the panel. Showing with no terminals opens a new shell.
-function M.toggle()
-	if panel_open() then
-		M.hide()
-	elseif active then
-		show(active)
-	else
-		M.new()
 	end
 end
 
@@ -200,15 +161,21 @@ function _G.TerminalTabsNew()
 	M.new()
 end
 
-function M.setup()
-	-- Ctrl+` (VS Code style). Terminals with the kitty keyboard protocol
-	-- (Ghostty, WezTerm via `enable_kitty_keyboard`) report it as <C-`>, or
-	-- with Shift held as <C-~> / <C-S-`>. Others (Ptyxis, GNOME Terminal, any
-	-- VTE terminal) send NUL, which Neovim sees as <C-Space> / <C-@>, so those
-	-- are mapped too. Ctrl+Space toggles the panel as a side effect.
-	for _, lhs in ipairs({ "<C-e>", "<C-`>", "<C-~>", "<C-S-`>", "<C-Space>", "<C-@>" }) do
-		vim.keymap.set({ "n", "t" }, lhs, M.toggle, { desc = "Toggle bottom terminal panel" })
-	end
-end
+panel.register("terminal", {
+	icon = "", -- nf-cod-terminal
+	winbar = "%{%v:lua.TerminalTabsWinbar()%}",
+	buf = function()
+		local _, tab = find(active)
+		return tab and tab.buf
+	end,
+	-- show the last used terminal, or start a shell if there are none
+	open = function()
+		if active then
+			show(active)
+		else
+			M.new()
+		end
+	end,
+})
 
 return M

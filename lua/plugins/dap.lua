@@ -1,15 +1,27 @@
--- Debug Adapter Protocol setup. Wires nvim-dap + dap-ui + virtual text and
--- configures `netcoredbg` for C# / .NET debugging. The adapter itself is
+-- Debug Adapter Protocol setup. Wires nvim-dap + virtual text and configures
+-- `netcoredbg` for C# / .NET debugging. The UI is the debug view of the bottom
+-- panel (lua/debug-console.lua) instead of nvim-dap-ui. The adapter itself is
 -- installed via Mason (see lua/plugins/lsp-config.lua).
 
 return {
   {
     "mfussenegger/nvim-dap",
     dependencies = {
-      "rcarriga/nvim-dap-ui",
-      "nvim-neotest/nvim-nio", -- required by dap-ui
       "theHamsta/nvim-dap-virtual-text",
     },
+    init = function()
+      -- Clicking the line numbers / sign column of a file toggles a breakpoint
+      -- on that line, VS Code style. Clicks anywhere else behave as usual.
+      vim.keymap.set("n", "<LeftMouse>", function()
+        local pos = vim.fn.getmousepos()
+        local info = pos.winid ~= 0 and vim.fn.getwininfo(pos.winid)[1]
+        local in_gutter = info and pos.line > 0 and pos.wincol <= info.textoff
+        if in_gutter and vim.bo[vim.api.nvim_win_get_buf(pos.winid)].buftype == "" then
+          return "<LeftMouse><Cmd>lua require('dap').toggle_breakpoint()<CR>"
+        end
+        return "<LeftMouse>"
+      end, { expr = true, desc = "Click line number: toggle DAP breakpoint" })
+    end,
     keys = {
       { "<F5>", function() require("dap").continue() end, desc = "DAP: Continue / Start" },
       { "<F10>", function() require("dap").step_over() end, desc = "DAP: Step over" },
@@ -27,21 +39,20 @@ return {
       { "<leader>dr", function() require("dap").repl.toggle() end, desc = "DAP: Toggle [R]EPL" },
       { "<leader>dt", function() require("dap").terminate() end, desc = "DAP: [T]erminate" },
       { "<leader>dl", function() require("dap").run_last() end, desc = "DAP: Run [L]ast" },
-      { "<leader>du", function() require("dapui").toggle() end, desc = "DAP: Toggle [U]I" },
+      { "<leader>du", function() require("debug-console").open() end, desc = "DAP: Show debug console ([U]I)" },
+      { "<leader>de", function() require("dap.ui.widgets").hover() end, desc = "DAP: [E]val expression under cursor" },
       {
-        "<leader>de",
+        "<leader>ds",
         function()
-          require("dapui").eval(nil, { enter = true })
+          local widgets = require("dap.ui.widgets")
+          widgets.centered_float(widgets.scopes)
         end,
-        desc = "DAP: [E]val expression",
-        mode = { "n", "x" },
+        desc = "DAP: [S]copes / variables",
       },
     },
     config = function()
       local dap = require("dap")
-      local dapui = require("dapui")
 
-      dapui.setup()
       require("nvim-dap-virtual-text").setup({
         commented = true,
       })
@@ -53,11 +64,59 @@ return {
       vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DiagnosticOk", linehl = "Visual", numhl = "" })
       vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "DiagnosticError", linehl = "", numhl = "" })
 
-      -- Open / close the UI alongside the debug session lifecycle.
-      dap.listeners.before.attach.dapui_config = function() dapui.open() end
-      dap.listeners.before.launch.dapui_config = function() dapui.open() end
-      dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
-      dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
+      -- Output, status and step buttons in the bottom panel's debug view.
+      require("debug-console").attach(dap)
+
+      -- Where to show the line the debugger stopped on. nvim-dap's default
+      -- falls back to the current or previous window, which may be neo-tree or
+      -- the bottom panel; neo-tree swaps its own buffer back in and the jump
+      -- fails ("Adapter reported frame ... Invalid cursor line"). Use a window
+      -- already showing the file, else the code window used last.
+      local function is_code_win(win)
+        return vim.api.nvim_win_get_config(win).relative == ""
+          and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
+      end
+      local last_code_win = nil
+      vim.api.nvim_create_autocmd("WinEnter", {
+        callback = function()
+          local win = vim.api.nvim_get_current_win()
+          if is_code_win(win) then
+            last_code_win = win
+          end
+        end,
+      })
+      dap.defaults.fallback.switchbuf = function(bufnr, line, column)
+        local wins = vim.api.nvim_tabpage_list_wins(0)
+        local target
+        for _, win in ipairs(wins) do
+          if vim.api.nvim_win_get_buf(win) == bufnr then
+            target = win
+            break
+          end
+        end
+        if not target and last_code_win and vim.api.nvim_win_is_valid(last_code_win) and is_code_win(last_code_win) then
+          target = last_code_win
+        end
+        if not target then
+          for _, win in ipairs(wins) do
+            if is_code_win(win) then
+              target = win
+              break
+            end
+          end
+        end
+        if target then
+          vim.api.nvim_win_set_buf(target, bufnr)
+          vim.api.nvim_set_current_win(target)
+        else
+          -- only special windows open (neo-tree, panel): open one for the code
+          vim.cmd("topleft split")
+          vim.api.nvim_win_set_buf(0, bufnr)
+          target = vim.api.nvim_get_current_win()
+        end
+        pcall(vim.api.nvim_win_set_cursor, target, { line, math.max(column - 1, 0) })
+        vim.cmd("normal! zv")
+      end
 
       -- .NET / C# adapter. netcoredbg is installed via Mason, which puts it on
       -- PATH; fall back to the Mason package directory just in case.
