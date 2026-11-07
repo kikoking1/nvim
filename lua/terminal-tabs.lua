@@ -201,12 +201,12 @@ function _G.TerminalTabsNew()
 end
 
 function M.setup()
-	-- Ctrl+` (VS Code style). Terminals report it as <C-`>, or with Shift held
-	-- as <C-~> / <C-S-`>, so all are mapped. Needs a terminal that sends
-	-- distinct Ctrl+key codes (kitty keyboard protocol): Ghostty does by
-	-- default, WezTerm via `enable_kitty_keyboard` in .wezterm.lua. Without it,
-	-- Ctrl+` is sent as NUL (same as Ctrl+Space).
-	for _, lhs in ipairs({ "<C-e>", "<C-`>", "<C-~>", "<C-S-`>" }) do
+	-- Ctrl+` (VS Code style). Terminals with the kitty keyboard protocol
+	-- (Ghostty, WezTerm via `enable_kitty_keyboard`) report it as <C-`>, or
+	-- with Shift held as <C-~> / <C-S-`>. Others (Ptyxis, GNOME Terminal, any
+	-- VTE terminal) send NUL, which Neovim sees as <C-Space> / <C-@>, so those
+	-- are mapped too. Ctrl+Space toggles the panel as a side effect.
+	for _, lhs in ipairs({ "<C-e>", "<C-`>", "<C-~>", "<C-S-`>", "<C-Space>", "<C-@>" }) do
 		vim.keymap.set({ "n", "t" }, lhs, M.toggle, { desc = "Toggle bottom terminal panel" })
 	end
 end
