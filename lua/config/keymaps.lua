@@ -13,7 +13,7 @@ map("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
 map({ "n", "i", "x", "s" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
 map({ "n", "i", "x", "s" }, "<D-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
 
--- Resize the current window: H / L narrower / wider, J / K shorter / taller
+-- Resize the current window: H / L wider / narrower, J / K shorter / taller
 -- (a count multiplies the step). A direction the window has no neighbour in
 -- is ignored, e.g. J / K on a full-height vsplit (resizing that would grow or
 -- shrink the command line instead).
@@ -32,7 +32,7 @@ end
 -- Ctrl+Shift+letter needs a terminal that sends it distinctly from
 -- Ctrl+letter (kitty keyboard protocol: Ghostty, WezTerm). Others (Ptyxis /
 -- VTE) send plain Ctrl+H/J/K/L, which move between windows instead.
-for _, key in ipairs({ { "h", "width", -3 }, { "l", "width", 3 }, { "j", "height", -2 }, { "k", "height", 2 } }) do
+for _, key in ipairs({ { "h", "width", 3 }, { "l", "width", -3 }, { "j", "height", -2 }, { "k", "height", 2 } }) do
 	local letter, dim, delta = key[1], key[2], key[3]
 	local desc = "Resize window: " .. (delta < 0 and "smaller " or "larger ") .. dim
 	map({ "n", "t" }, "<C-S-" .. letter .. ">", resize(dim, delta), { desc = desc })

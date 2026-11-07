@@ -30,3 +30,7 @@ quick-terminal-position = top
 # Set a global hotkey to toggle it from anywhere in your OS
 keybind = global:ctrl+t=toggle_quick_terminal
 
+
+# Let Ctrl+Shift+J reach Neovim (it resizes windows there). Ghostty's default
+# binds it to write_screen_file:paste, which pastes a temp-file path.
+keybind = ctrl+shift+j=unbind

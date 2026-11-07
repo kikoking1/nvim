@@ -204,7 +204,7 @@ Leader is `<Space>`. A few highlights:
 | Keys | Action |
 |---|---|
 | `<C-s>` / `<D-s>` (Cmd+S) | Save the buffer (normal, insert and visual mode) |
-| `<C-S-h>` / `<C-S-l>` / `<C-S-j>` / `<C-S-k>` | Resize window: narrower / wider / shorter / taller (needs Ghostty or WezTerm; Ptyxis sends plain Ctrl) |
+| `<C-S-h>` / `<C-S-l>` / `<C-S-j>` / `<C-S-k>` | Resize window: wider / narrower / shorter / taller (needs Ghostty or WezTerm; Ptyxis sends plain Ctrl) |
 | `<leader>ff` / `<leader>fg` | Find files / live grep (Telescope) |
 | `<leader>fa` | Live grep with args (regex, glob, …) |
 | `<leader>nn` / `<leader>nf` | Toggle Neo-tree / reveal current file |
