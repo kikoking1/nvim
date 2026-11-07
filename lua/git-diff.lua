@@ -1,5 +1,5 @@
 -- VS Code style diff of a changed file, opened from the Git view of neo-tree.
--- Each diff is its own buffer tab in the bufferline, "<file> (diff)". While
+-- Each diff is its own buffer tab in the bufferline, "diff <file>". While
 -- that tab is shown, its window holds the old version (read-only) and a split
 -- to its right holds the file itself, to edit as usual. Each change gets a
 -- ">>" button in the old version's gutter that reverts just that hunk in the
@@ -226,8 +226,8 @@ end
 local function new_entry(path)
 	local buf = vim.api.nvim_create_buf(true, true)
 	vim.bo[buf].bufhidden = "hide"
-	-- the bufferline shows the part after the last "/": "<file> (diff)"
-	vim.api.nvim_buf_set_name(buf, "git-diff://" .. path .. " (diff)")
+	-- the bufferline shows the part after the last "/": "diff <file>"
+	vim.api.nvim_buf_set_name(buf, "git-diff://" .. vim.fs.dirname(path) .. "/diff " .. vim.fs.basename(path))
 	vim.bo[buf].filetype = vim.filetype.match({ filename = path }) or ""
 	vim.b[buf].git_diff = true -- lua/editor-win.lua treats it as a code window
 
