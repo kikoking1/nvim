@@ -5,6 +5,14 @@ local map = vim.keymap.set
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 map("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
 
+-- Save like :w, VS Code style, staying in the current mode. Cmd+S arrives as
+-- <D-s> on macOS, or with the Super key in terminals that pass it through
+-- (Ghostty, WezTerm with the kitty keyboard protocol). Replaces Neovim's
+-- default insert-mode <C-s> (LSP signature help). Not in terminal mode, so
+-- the shell still gets Ctrl+S.
+map({ "n", "i", "x", "s" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
+map({ "n", "i", "x", "s" }, "<D-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
+
 -- System clipboard
 map({ "n", "x" }, "<leader>p", '"+gP', { desc = "Paste from system clipboard" })
 map({ "n", "x" }, "<leader>y", [["+y]], { desc = "Yank to system clipboard" })

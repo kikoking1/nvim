@@ -203,6 +203,7 @@ Leader is `<Space>`. A few highlights:
 
 | Keys | Action |
 |---|---|
+| `<C-s>` / `<D-s>` (Cmd+S) | Save the buffer (normal, insert and visual mode) |
 | `<leader>ff` / `<leader>fg` | Find files / live grep (Telescope) |
 | `<leader>fa` | Live grep with args (regex, glob, …) |
 | `<leader>nn` / `<leader>nf` | Toggle Neo-tree / reveal current file |
@@ -214,6 +215,7 @@ Leader is `<Space>`. A few highlights:
 | `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |
 | `<leader>gh` / `<leader>gb` | Gitsigns: preview hunk / toggle blame |
 | `` <C-`> `` | Toggle the bottom panel (terminal tabs / debug console) |
+| `J` / `K` (in the panel, normal mode) | Switch between the terminal and debug views |
 | `<leader>tf` / `<leader>tg` | Toggleterm: float / lazygit |
 | `<leader>qf` | Toggle quickfix list (`dd` to delete an item) |
 | `<leader>cp` | Copy the current buffer's absolute path |

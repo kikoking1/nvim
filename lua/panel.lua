@@ -104,6 +104,31 @@ local plain = {
 	list = false,
 }
 
+-- Switch to the view delta icons down (1) or up (-1) the sidebar, stopping
+-- at the ends.
+function M.step(delta)
+	for i, item in ipairs(order) do
+		if item.name == current then
+			local target = order[i + delta]
+			if target then
+				views[target.name].open({ focus = true })
+			end
+			return
+		end
+	end
+end
+
+-- J / K in normal mode step through the views, like in neo-tree. Not in
+-- terminal mode, where they have to type into the shell.
+local function map_step_keys(buf)
+	vim.keymap.set("n", "J", function()
+		M.step(1)
+	end, { buffer = buf, desc = "Panel: next view" })
+	vim.keymap.set("n", "K", function()
+		M.step(-1)
+	end, { buffer = buf, desc = "Panel: previous view" })
+end
+
 -- Show a view's buffer in the panel, opening the panel if needed.
 -- opts.focus (default true) moves the cursor into the panel.
 function M.show(name, opts)
@@ -124,6 +149,7 @@ function M.show(name, opts)
 		vim.wo[bar:open({ split = "left", win = content })].winfixheight = true
 	end
 	set_opts(content, plain)
+	map_step_keys(buf)
 	current = name
 	vim.wo[content].winbar = view.winbar
 	bar:render(name)
