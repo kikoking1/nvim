@@ -103,6 +103,17 @@ function M.revert_hunk(i)
 	end
 end
 
+-- The hunk the cursor is in on the old version side: line is inside its old
+-- lines, or on its ">>" line (for added lines, which have no old lines).
+local function hunk_at(entry, line)
+	for i, h in ipairs(entry.hunks) do
+		local first, count = h[1], h[2]
+		if (count > 0 and line >= first and line < first + count) or line == math.max(first, 1) then
+			return i
+		end
+	end
+end
+
 -- Show entry's panes: the old version in win, the file in a split to its right.
 local function attach(entry, win)
 	if active and active ~= entry then
@@ -229,6 +240,12 @@ local function new_entry(path)
 	vim.keymap.set("n", "q", function()
 		M.close(entry)
 	end, { buffer = buf, desc = "Close the git diff" })
+	vim.keymap.set("n", "<leader>u", function()
+		local i = active == entry and hunk_at(entry, vim.fn.line("."))
+		if i then
+			M.revert_hunk(i)
+		end
+	end, { buffer = buf, desc = "Git diff: revert the hunk under the cursor (like >>)" })
 
 	-- The tab left its window (another tab shown there, or the window /
 	-- buffer closed). If the window is still there, it shows another tab:
