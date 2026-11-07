@@ -321,8 +321,13 @@ function M.open(path)
 	set_base(entry)
 	local win = require("editor-win").show(entry.buf)
 	attach(entry, win)
-	if valid(entry.right_win) then
-		vim.api.nvim_set_current_win(entry.right_win)
+	-- Stay in the old version pane: the bufferline marks the buffer under the
+	-- cursor as the selected tab, so this keeps the diff tab selected (and
+	-- <M-D> closes it, not the file). Start at the first change.
+	vim.api.nvim_set_current_win(win)
+	local first = entry.hunks[1]
+	if first then
+		pcall(vim.api.nvim_win_set_cursor, win, { math.max(first[1], 1), 0 })
 	end
 end
 
