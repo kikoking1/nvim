@@ -10,7 +10,7 @@ sudo pacman -S neovim git ripgrep fd tree-sitter-cli base-devel
 nvim --version | head -1   # must be 0.12+; if not, `paru -S neovim-git` (AUR)
 
 # Recommended
-sudo pacman -S lazygit wl-clipboard ttf-nerd-fonts-symbols   # xclip instead of wl-clipboard on X11
+sudo pacman -S wl-clipboard ttf-nerd-fonts-symbols   # xclip instead of wl-clipboard on X11
 
 # Per-language (install only what you use)
 sudo pacman -S go dotnet-sdk zig
@@ -29,7 +29,6 @@ If you have Homebrew, the following one block installs everything most users wil
 brew install neovim git ripgrep fd tree-sitter-cli
 
 # Recommended
-brew install lazygit
 brew install --cask font-jetbrains-mono-nerd-font   # any Nerd Font works
 
 # Per-language (install only what you use)
@@ -65,7 +64,6 @@ These are needed for the editor itself to load and for core features (find files
 | Tool | Why | Install |
 |---|---|---|
 | **`fd`** | Faster file finding for `telescope.find_files` (`<leader>ff`) | `pacman -S fd` / `brew install fd` |
-| **`lazygit`** | Bound to `<leader>tg` (opens lazygit in a floating terminal) | `pacman -S lazygit` / `brew install lazygit` |
 | **Clipboard tool** (Linux only) | System clipboard for `<leader>y` / `<leader>p` (`"+` register) | Wayland: `pacman -S wl-clipboard`; X11: `pacman -S xclip`. macOS has this built in |
 
 ### Per-language
@@ -213,11 +211,10 @@ Leader is `<Space>`. A few highlights:
 | Git view (Git icon left of Neo-tree) | `<CR>` / double-click: diff, `s`: stage / unstage, `d`: discard, right-click: menu. In a diff's left pane, `>>` or `<leader>u` reverts a hunk |
 | `<leader>a` / `<leader>h` | Harpoon: add / open menu |
 | `<A-j>` `<A-k>` `<A-l>` `<A-n>` | Jump to Harpoon files 1–4 |
-| `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |
+| `<leader>gl` / `<leader>gL` | Diffview: repo / current file history (`q` closes) |
 | `<leader>gh` / `<leader>gb` | Gitsigns: preview hunk / toggle blame |
 | `` <C-`> `` | Toggle the bottom panel (terminal tabs / debug console) |
 | `J` / `K` (in the panel, normal mode) | Switch between the terminal and debug views |
-| `<leader>tf` / `<leader>tg` | Toggleterm: float / lazygit |
 | `<leader>qf` | Toggle quickfix list (`dd` to delete an item) |
 | `<leader>cp` | Copy the current buffer's absolute path |
 | `gcc` / `gc{motion}` | Toggle comments (built into Neovim) |

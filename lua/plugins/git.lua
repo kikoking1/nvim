@@ -1,13 +1,5 @@
 return {
   {
-    "tpope/vim-fugitive",
-    cmd = { "Git", "Gvdiffsplit" },
-    keys = {
-      { "<leader>gs", "<cmd>Git<cr>", desc = "[G]it [S]tatus" },
-      { "<leader>gd", "<cmd>Gvdiffsplit<cr>", desc = "[G]it [D]iff" },
-    },
-  },
-  {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
     opts = {},
@@ -31,12 +23,17 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFileHistory" },
     keys = {
-      { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "[G]it diff[V]iew open" },
-      { "<leader>gV", "<cmd>DiffviewClose<cr>", desc = "[G]it diff[V]iew close" },
       { "<leader>gl", "<cmd>DiffviewFileHistory<cr>", desc = "[G]it [L]og (repo history)" },
       { "<leader>gL", "<cmd>DiffviewFileHistory %<cr>", desc = "[G]it [L]og (current file)" },
     },
+    -- Only for history: changed files and diffs are the Git view beside
+    -- neo-tree (lua/git-diff.lua). q closes a history view.
     opts = {
+      keymaps = {
+        view = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close diffview" } } },
+        file_panel = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close diffview" } } },
+        file_history_panel = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close diffview" } } },
+      },
       enhanced_diff_hl = true,
       view = {
         merge_tool = { layout = "diff3_mixed" },
