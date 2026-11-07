@@ -6,3 +6,4 @@ require("config.autocmds")
 require("config.lazy")
 
 require("terminal-maximize").setup()
+require("terminal-tabs").setup()

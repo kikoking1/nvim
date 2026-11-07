@@ -32,23 +32,14 @@ local function find_dotnet_project(dir)
 	end
 end
 
--- One terminal per project; re-running restarts it.
-local dotnet_terms = {}
-
+-- Runs in its own tab of the bottom terminal panel. Keyed by project, so
+-- re-running restarts it; the tab stays open after exit to keep the output.
 local function dotnet_run(project)
-	if dotnet_terms[project] then
-		dotnet_terms[project]:shutdown()
-	end
-	local term = require("toggleterm.terminal").Terminal:new({
-		cmd = "dotnet run --project " .. vim.fn.shellescape(project),
-		dir = vim.fn.fnamemodify(project, ":h"),
-		direction = "horizontal",
-		display_name = "dotnet run " .. vim.fn.fnamemodify(project, ":t:r"),
-		-- keep the output visible after the app exits or crashes
-		close_on_exit = false,
+	require("terminal-tabs").run("dotnet run --project " .. vim.fn.shellescape(project), {
+		name = "run " .. vim.fn.fnamemodify(project, ":t:r"),
+		cwd = vim.fn.fnamemodify(project, ":h"),
+		key = "dotnet:" .. project,
 	})
-	dotnet_terms[project] = term
-	term:open()
 end
 
 local function context_menu(state)
