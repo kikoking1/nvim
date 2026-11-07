@@ -11,8 +11,9 @@ function M.is_code_win(win)
 		return false
 	end
 	local buf = vim.api.nvim_win_get_buf(win)
-	-- the dashboard counts: it's what fills the editor area at startup
-	return vim.bo[buf].buftype == "" or vim.bo[buf].filetype == "alpha"
+	-- the dashboard counts: it's what fills the editor area at startup; so do
+	-- diff tabs (lua/git-diff.lua)
+	return vim.bo[buf].buftype == "" or vim.bo[buf].filetype == "alpha" or vim.b[buf].git_diff == true
 end
 
 local last = nil
