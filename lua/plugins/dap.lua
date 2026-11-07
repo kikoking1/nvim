@@ -67,54 +67,13 @@ return {
       -- Output, status and step buttons in the bottom panel's debug view.
       require("debug-console").attach(dap)
 
-      -- Where to show the line the debugger stopped on. nvim-dap's default
-      -- falls back to the current or previous window, which may be neo-tree or
-      -- the bottom panel; neo-tree swaps its own buffer back in and the jump
-      -- fails ("Adapter reported frame ... Invalid cursor line"). Use a window
-      -- already showing the file, else the code window used last.
-      local function is_code_win(win)
-        return vim.api.nvim_win_get_config(win).relative == ""
-          and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
-      end
-      local last_code_win = nil
-      vim.api.nvim_create_autocmd("WinEnter", {
-        callback = function()
-          local win = vim.api.nvim_get_current_win()
-          if is_code_win(win) then
-            last_code_win = win
-          end
-        end,
-      })
+      -- Show the line the debugger stopped on in a code window. nvim-dap's
+      -- default falls back to the current or previous window, which may be
+      -- neo-tree or the bottom panel; neo-tree swaps its own buffer back in and
+      -- the jump fails ("Adapter reported frame ... Invalid cursor line").
       dap.defaults.fallback.switchbuf = function(bufnr, line, column)
-        local wins = vim.api.nvim_tabpage_list_wins(0)
-        local target
-        for _, win in ipairs(wins) do
-          if vim.api.nvim_win_get_buf(win) == bufnr then
-            target = win
-            break
-          end
-        end
-        if not target and last_code_win and vim.api.nvim_win_is_valid(last_code_win) and is_code_win(last_code_win) then
-          target = last_code_win
-        end
-        if not target then
-          for _, win in ipairs(wins) do
-            if is_code_win(win) then
-              target = win
-              break
-            end
-          end
-        end
-        if target then
-          vim.api.nvim_win_set_buf(target, bufnr)
-          vim.api.nvim_set_current_win(target)
-        else
-          -- only special windows open (neo-tree, panel): open one for the code
-          vim.cmd("topleft split")
-          vim.api.nvim_win_set_buf(0, bufnr)
-          target = vim.api.nvim_get_current_win()
-        end
-        pcall(vim.api.nvim_win_set_cursor, target, { line, math.max(column - 1, 0) })
+        local win = require("editor-win").show(bufnr)
+        pcall(vim.api.nvim_win_set_cursor, win, { line, math.max(column - 1, 0) })
         vim.cmd("normal! zv")
       end
 

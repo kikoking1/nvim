@@ -7,3 +7,5 @@ require("config.lazy")
 
 require("terminal-maximize").setup()
 require("panel").setup()
+-- start tracking the last used code window (lua/editor-win.lua)
+require("editor-win")

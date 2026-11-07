@@ -22,15 +22,33 @@ local function telescope_find(state)
 	})
 end
 
-local function context_menu(state)
-	-- a mapped right-click doesn't move the cursor, so do it here
+-- A mapped right-click doesn't move the cursor, so move it to the clicked
+-- line, then return the node there.
+local function node_at_mouse(state)
 	local pos = vim.fn.getmousepos()
 	if pos.winid ~= 0 and pos.line > 0 then
 		vim.api.nvim_set_current_win(pos.winid)
 		vim.api.nvim_win_set_cursor(pos.winid, { pos.line, 0 })
 	end
+	return state.tree:get_node()
+end
 
-	local node = state.tree:get_node()
+-- items: list of { label, fn }
+local function show_menu(node, items)
+	vim.ui.select(items, {
+		prompt = vim.fn.fnamemodify(node:get_id(), ":t"),
+		format_item = function(item)
+			return item[1]
+		end,
+	}, function(choice)
+		if choice then
+			choice[2]()
+		end
+	end)
+end
+
+local function context_menu(state)
+	local node = node_at_mouse(state)
 	if not node then
 		return
 	end
@@ -70,17 +88,54 @@ local function context_menu(state)
 			{ "Delete", cmd("delete") },
 		}
 	end
+	show_menu(node, items)
+end
 
-	vim.ui.select(items, {
-		prompt = vim.fn.fnamemodify(node:get_id(), ":t"),
-		format_item = function(item)
-			return item[1]
-		end,
-	}, function(choice)
-		if choice then
-			choice[2]()
-		end
-	end)
+-- Git view (the git_status source, opened from the activity bar).
+
+-- Files open as a side-by-side diff (lua/git-diff.lua); folders expand.
+local function git_open_diff(state)
+	local node = state.tree:get_node()
+	if node.type == "file" then
+		require("git-diff").open(node:get_id())
+	else
+		require("neo-tree.sources.common.commands").toggle_node(state)
+	end
+end
+
+local function git_toggle_stage(state)
+	require("git").toggle_stage(state.tree:get_node():get_id())
+end
+
+local function git_discard(state)
+	require("git").discard(state.tree:get_node():get_id())
+end
+
+local function git_context_menu(state)
+	local node = node_at_mouse(state)
+	if not node then
+		return
+	end
+	local git = require("git")
+	local path = node:get_id()
+	local kind = node.type == "file" and "File" or "Folder"
+	local items = {}
+	if node.type == "file" then
+		table.insert(items, { "Open Changes", function() require("git-diff").open(path) end })
+		table.insert(items, {
+			"Open File",
+			function()
+				require("editor-win").show(vim.fn.bufadd(path))
+			end,
+		})
+	end
+	local staging = git.has_unstaged((git.status(path)))
+	table.insert(items, {
+		(staging and "Stage " or "Unstage ") .. kind .. "  (s)",
+		function() git.toggle_stage(path) end,
+	})
+	table.insert(items, { "Discard Changes  (d)", function() git.discard(path) end })
+	show_menu(node, items)
 end
 
 return {
@@ -111,6 +166,42 @@ return {
 				telescope_grep = telescope_grep,
 				telescope_find = telescope_find,
 				context_menu = context_menu,
+			},
+		},
+		git_status = {
+			window = {
+				mappings = {
+					["<cr>"] = "git_open_diff",
+					["<2-LeftMouse>"] = "git_open_diff",
+					["s"] = "git_toggle_stage",
+					["d"] = "git_discard",
+					["<RightMouse>"] = "git_context_menu",
+				},
+			},
+			commands = {
+				git_open_diff = git_open_diff,
+				git_toggle_stage = git_toggle_stage,
+				git_discard = git_discard,
+				git_context_menu = git_context_menu,
+			},
+		},
+		-- Files / Git activity bar to the left of the tree (lua/activity-bar.lua)
+		event_handlers = {
+			{
+				event = "neo_tree_window_after_open",
+				handler = function(args)
+					if args.position == "left" then
+						require("activity-bar").attach(args.winid, args.source)
+					end
+				end,
+			},
+			{
+				event = "neo_tree_window_before_close",
+				handler = function(args)
+					if args.position == "left" then
+						require("activity-bar").detach()
+					end
+				end,
 			},
 		},
 	},

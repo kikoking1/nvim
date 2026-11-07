@@ -189,6 +189,11 @@ lua/
   terminal-tabs.lua         terminal view: tabbed terminals
   debug-console.lua         debug view: debug output + step buttons
   dotnet.lua                run / debug .NET projects (Neo-tree right-click)
+  sidebar.lua               icon-tile column shared by the panel and activity bar
+  activity-bar.lua          Files / Git icons to the left of Neo-tree
+  git.lua                   stage / unstage / discard for the Git view
+  git-diff.lua              side-by-side diff with per-hunk revert
+  editor-win.lua            picks the code window to open files in
   terminal-maximize.lua     toggle full-size for terminal splits
 ```
 
@@ -201,6 +206,7 @@ Leader is `<Space>`. A few highlights:
 | `<leader>ff` / `<leader>fg` | Find files / live grep (Telescope) |
 | `<leader>fa` | Live grep with args (regex, glob, …) |
 | `<leader>nn` / `<leader>nf` | Toggle Neo-tree / reveal current file |
+| Git view (Git icon left of Neo-tree) | `<CR>` / double-click: diff, `s`: stage / unstage, `d`: discard, right-click: menu |
 | `<leader>a` / `<leader>h` | Harpoon: add / open menu |
 | `<A-j>` `<A-k>` `<A-l>` `<A-n>` | Jump to Harpoon files 1–4 |
 | `<leader>gs` / `<leader>gd` | Fugitive: status / diff split |

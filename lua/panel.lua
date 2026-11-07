@@ -10,11 +10,10 @@ local M = {}
 
 local views, order = {}, {}
 local current = nil -- view in the panel (kept while hidden, reopened by toggle)
-local content, sidebar = nil, nil -- windows
-local sidebar_buf = nil
+local content = nil -- window
+local sidebar = nil -- lua/sidebar.lua instance, created on first show
 local height = 15
 local closing = false
-local ns = vim.api.nvim_create_namespace("panel")
 
 local function valid(win)
 	return win ~= nil and vim.api.nvim_win_is_valid(win)
@@ -22,7 +21,7 @@ end
 
 function M.register(name, view)
 	views[name] = view
-	table.insert(order, name)
+	table.insert(order, { name = name, icon = view.icon })
 end
 
 function M.is_open()
@@ -38,10 +37,6 @@ function M.content_win()
 	return M.is_open() and content or nil
 end
 
-local SIDEBAR_WIDTH = 6
--- Each view gets a 3-line tile (icon on the middle line) plus a blank line.
-local TILE = 4
-
 -- Highlight groups, derived from the colorscheme so they follow it. The
 -- usual TabLine colours are too dim to read (tokyonight's is #3b4261).
 local function set_highlights()
@@ -55,12 +50,6 @@ local function set_highlights()
 	local text = get("WinBar").fg or normal.fg
 
 	set("PanelBar", { fg = text, bg = bar.bg })
-	-- sidebar
-	set("PanelSidebar", { fg = text, bg = bar.bg })
-	set("PanelSidebarActive", { bg = raised.bg })
-	set("PanelSidebarIcon", { fg = text, bg = bar.bg })
-	set("PanelSidebarIconActive", { fg = normal.fg, bg = raised.bg, bold = true })
-	set("PanelSidebarAccent", { fg = sel.bg, bg = raised.bg })
 	-- terminal tabs
 	set("PanelTab", { fg = text, bg = bar.bg })
 	set("PanelTabSel", { fg = sel.fg, bg = sel.bg, bold = true })
@@ -78,56 +67,9 @@ local function set_highlights()
 	end
 end
 
-local function view_at(line)
-	if line % TILE ~= 0 then
-		return order[math.ceil(line / TILE)]
-	end
-end
-
-local function render_sidebar()
-	if not (sidebar_buf and vim.api.nvim_buf_is_valid(sidebar_buf)) then
-		return
-	end
-	local lines = {}
-	for i, name in ipairs(order) do
-		local top = (i - 1) * TILE
-		lines[top + 1] = ""
-		lines[top + 2] = "  " .. views[name].icon
-		lines[top + 3] = ""
-		lines[top + 4] = ""
-	end
-	vim.bo[sidebar_buf].modifiable = true
-	vim.api.nvim_buf_set_lines(sidebar_buf, 0, -1, false, lines)
-	vim.bo[sidebar_buf].modifiable = false
-	vim.api.nvim_buf_clear_namespace(sidebar_buf, ns, 0, -1)
-	for i, name in ipairs(order) do
-		local top = (i - 1) * TILE
-		local active = name == current
-		vim.api.nvim_buf_set_extmark(sidebar_buf, ns, top + 1, 2, {
-			end_col = #lines[top + 2],
-			hl_group = active and "PanelSidebarIconActive" or "PanelSidebarIcon",
-			priority = 200,
-		})
-		if active then
-			-- highlighted tile with an accent bar down its left edge
-			for row = top, top + 2 do
-				vim.api.nvim_buf_set_extmark(sidebar_buf, ns, row, 0, {
-					line_hl_group = "PanelSidebarActive",
-					virt_text = { { "▌", "PanelSidebarAccent" } },
-					virt_text_pos = "overlay",
-				})
-			end
-		end
-	end
-end
-
--- Clicking the sidebar enters its window; switch to the view on the clicked
--- line and hand focus back to the content window.
-local function on_sidebar_enter()
-	if not valid(sidebar) or vim.api.nvim_get_current_win() ~= sidebar then
-		return
-	end
-	local name = view_at(vim.api.nvim_win_get_cursor(sidebar)[1])
+-- Clicking a sidebar tile switches to that view; clicking empty space just
+-- hands focus back to the content window.
+local function on_select(name)
 	if name then
 		views[name].open({ focus = true })
 	elseif M.is_open() then
@@ -135,28 +77,16 @@ local function on_sidebar_enter()
 	end
 end
 
-local function get_sidebar_buf()
-	if sidebar_buf and vim.api.nvim_buf_is_valid(sidebar_buf) then
-		return sidebar_buf
-	end
-	sidebar_buf = vim.api.nvim_create_buf(false, true)
-	vim.bo[sidebar_buf].bufhidden = "hide"
-	vim.bo[sidebar_buf].filetype = "panel-sidebar"
-	local pending = false
-	vim.api.nvim_create_autocmd({ "WinEnter", "CursorMoved" }, {
-		buffer = sidebar_buf,
-		callback = function()
-			if pending then
-				return
-			end
-			pending = true
-			vim.schedule(function()
-				pending = false
-				on_sidebar_enter()
-			end)
-		end,
-	})
-	return sidebar_buf
+local function get_sidebar()
+	sidebar = sidebar
+		or require("sidebar").new({
+			filetype = "panel-sidebar",
+			items = order,
+			on_select = on_select,
+			-- empty bar so the icons line up with the content below its winbar
+			winbar = "%#PanelBar# ",
+		})
+	return sidebar
 end
 
 local function set_opts(win, opts)
@@ -174,21 +104,6 @@ local plain = {
 	list = false,
 }
 
-local function open_sidebar()
-	sidebar = vim.api.nvim_open_win(get_sidebar_buf(), false, { split = "left", win = content, width = SIDEBAR_WIDTH })
-	set_opts(sidebar, plain)
-	set_opts(sidebar, {
-		winfixwidth = true,
-		winfixheight = true,
-		cursorline = false,
-		wrap = false,
-		fillchars = "eob: ",
-		winhighlight = "Normal:PanelSidebar,EndOfBuffer:PanelSidebar",
-		-- empty bar so the icons line up with the content below its winbar
-		winbar = "%#PanelBar# ",
-	})
-end
-
 -- Show a view's buffer in the panel, opening the panel if needed.
 -- opts.focus (default true) moves the cursor into the panel.
 function M.show(name, opts)
@@ -204,13 +119,14 @@ function M.show(name, opts)
 		content = vim.api.nvim_open_win(buf, false, { split = "below", win = -1, height = height })
 		vim.wo[content].winfixheight = true
 	end
-	if not valid(sidebar) then
-		open_sidebar()
+	local bar = get_sidebar()
+	if not bar:is_open() then
+		vim.wo[bar:open({ split = "left", win = content })].winfixheight = true
 	end
 	set_opts(content, plain)
 	current = name
 	vim.wo[content].winbar = view.winbar
-	render_sidebar()
+	bar:render(name)
 	if opts.focus ~= false then
 		vim.api.nvim_set_current_win(content)
 	end
@@ -218,8 +134,8 @@ end
 
 function M.hide()
 	closing = true
-	if valid(sidebar) then
-		vim.api.nvim_win_close(sidebar, true)
+	if sidebar then
+		sidebar:close()
 	end
 	if M.is_open() then
 		height = vim.api.nvim_win_get_height(content)
@@ -231,7 +147,7 @@ function M.hide()
 			vim.wo[content].winbar = ""
 		end
 	end
-	content, sidebar = nil, nil
+	content = nil
 	closing = false
 end
 
@@ -240,7 +156,7 @@ function M.toggle()
 	if M.is_open() then
 		M.hide()
 	else
-		views[current or order[1]].open({ focus = true })
+		views[current or order[1].name].open({ focus = true })
 	end
 end
 
@@ -249,18 +165,13 @@ function M.setup()
 	require("debug-console")
 
 	set_highlights()
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		callback = function()
-			set_highlights()
-			render_sidebar()
-		end,
-	})
+	vim.api.nvim_create_autocmd("ColorScheme", { callback = set_highlights })
 
 	-- Closing either panel window (e.g. :q) closes the other one too.
 	vim.api.nvim_create_autocmd("WinClosed", {
 		callback = function(args)
 			local win = tonumber(args.match)
-			if not closing and (win == content or win == sidebar) then
+			if not closing and (win == content or (sidebar and win == sidebar.win)) then
 				vim.schedule(M.hide)
 			end
 		end,
