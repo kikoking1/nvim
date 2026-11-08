@@ -13,6 +13,53 @@ map("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
 map({ "n", "i", "x", "s" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
 map({ "n", "i", "x", "s" }, "<D-s>", "<Cmd>write<CR>", { desc = "Save buffer" })
 
+-- Smart <Tab>: on a blank (or whitespace-only) line, jump straight to the
+-- indent the block expects, computed by 'indentexpr' (treesitter where
+-- available), falling back to 'cindent' / the previous non-blank line. If the
+-- line already has text or is already at/past that indent, insert a normal Tab.
+local function expected_indent(lnum)
+	local expr = vim.bo.indentexpr
+	if expr ~= "" then
+		vim.v.lnum = lnum
+		local ok, ind = pcall(vim.fn.eval, expr)
+		if ok and tonumber(ind) and tonumber(ind) >= 0 then
+			return tonumber(ind)
+		end
+	end
+	if vim.bo.cindent then
+		return vim.fn.cindent(lnum)
+	end
+	local prev = vim.fn.prevnonblank(lnum - 1)
+	return prev > 0 and vim.fn.indent(prev) or 0
+end
+
+map("i", "<Tab>", function()
+	local line = vim.api.nvim_get_current_line()
+	if line:match("^%s*$") then
+		local lnum = vim.fn.line(".")
+		local want = expected_indent(lnum)
+		if want > vim.fn.strdisplaywidth(line) then
+			local ws
+			if vim.bo.expandtab then
+				ws = string.rep(" ", want)
+			else
+				local ts = vim.bo.tabstop
+				ws = string.rep("\t", math.floor(want / ts)) .. string.rep(" ", want % ts)
+			end
+			vim.api.nvim_set_current_line(ws)
+			vim.api.nvim_win_set_cursor(0, { lnum, #ws })
+			return
+		end
+	end
+	vim.api.nvim_feedkeys(vim.keycode("<Tab>"), "n", false)
+end, { desc = "Indent to block level, else Tab" })
+
+-- >> re-indents the line to its block level (like ==) instead of shifting it
+-- one 'shiftwidth'. A count re-indents that many lines, like 3==. In visual
+-- mode > does the same for the selection (like =).
+map("n", ">>", "==", { desc = "Re-indent line to block level" })
+map("x", ">", "=", { desc = "Re-indent selection to block level" })
+
 -- Resize the current window: H / L wider / narrower, J / K shorter / taller
 -- (a count multiplies the step). A direction the window has no neighbour in
 -- is ignored, e.g. J / K on a full-height vsplit (resizing that would grow or
