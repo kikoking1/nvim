@@ -71,7 +71,11 @@ return {
         end
         -- Silently skip filetypes whose parser isn't installed yet.
         local ok = pcall(vim.treesitter.start, args.buf, lang)
-        if ok then
+        -- Only take over indenting when the parser ships indent queries.
+        -- Some (c_sharp, vim, prisma) don't, and the treesitter indentexpr
+        -- then returns 0 for every line, flattening `==` / `>>` to column 0.
+        -- Those keep Neovim's own indent/<ft>.vim (e.g. GetCSIndent for C#).
+        if ok and vim.treesitter.query.get(lang, "indents") then
           vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         end
       end,
