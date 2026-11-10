@@ -36,6 +36,7 @@ return {
       "vim",
       "vimdoc",
       "prisma",
+      "python",
       "zig",
       "json",
       "yaml",
