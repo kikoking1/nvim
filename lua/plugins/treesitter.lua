@@ -25,6 +25,7 @@ return {
     -- by the `markdown` parser (injected for inline elements); without
     -- it, fenced code blocks/inlines fail to render.
     local ensure = {
+      "bash",
       "c_sharp",
       "go",
       "html",
